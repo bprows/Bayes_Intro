@@ -1,0 +1,84 @@
+---
+title: "HW3"
+author: "Broderick Prows"
+date: "1/16/2020"
+output: html_document
+---
+
+Questions:
+1. Do you support change in Honor Code to allow beards?
+2. Do you support capital punishment?
+3. Speak a foreign language?
+4. Do you support Trump impeachment?
+5. Can you drive a stick-shift?
+6. Ever traveled outside of the country?
+
+
+Using:
+1. Do you support change in Honor Code to allow beards?
+Priors:
+```{r}
+options(scipen=999)
+theta <- c(.25, .5, .75)
+p <- c(1/3, 1/3, 1/3)
+
+bayes_update_bernoli <- function(theta, priors, n, y) {
+  lkhd <- (theta ** y) * ( (1 - theta) ** (n - y)); lkhd
+  part_marg <- priors * lkhd; part_marg
+  marg_y <- sum(part_marg); marg_y
+  priors <- part_marg / marg_y;
+  bundle <- list("priors" = priors,
+                 "LKHD" = lkhd,
+                 "mid_marg" = part_marg,
+                 "Marginal" = marg_y)
+  return(bundle)
+}
+```
+
+  {y1 = 0}
+Bayes Update
+```{r}
+first <- bayes_update_bernoli(theta, p, n = 1, y = 0)
+first
+```
+
+
+{y2 = 1, y3 = 1, y4 = 1, y5 = 1, y6 = 1}
+```{r}
+then <- bayes_update_bernoli(theta, first$priors, n = 5, y = 5)
+then
+```
+
+{y7 = 1, y8 = 1, y9 = 1, y10 = 1, y11 = 0}
+```{r}
+last <- bayes_update_bernoli(theta, then$priors, n = 5, y = 4)
+last
+```
+
+What about all at once?
+```{r}
+bayes_update_bernoli(theta, p, n = 11, y = 9)
+```
+
+Using the binomial summary statistic.
+```{r}
+bayes_update_binomial <- function(theta, priors, n, y) {
+  lkhd <- choose(n,y) * (theta ** y) * ( (1 - theta) ** (n - y))
+  part_marg <- priors * lkhd
+  marg_y <- sum(part_marg)
+  priors <- part_marg / marg_y
+  bundle <- list("priors" = priors,
+                 "LKHD" = lkhd,
+                 "mid_marg" = part_marg,
+                 "Marginal" = marg_y)
+  return(bundle)
+}
+```
+
+
+```{r}
+bayes_update_binomial(theta, p, n = 11, y = 9)
+```
+
+
+
