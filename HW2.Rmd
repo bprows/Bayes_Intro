@@ -25,16 +25,16 @@ print(c('Alternatively: n*p = ', n*p))
 c. Support of X: {0, 1, 2, 3, 4, 5, 6, 7}
 
 
-2. X ~ exp(lambda = 1/100)
+2. f(x) = (1/100)exp(x/100) for x > 0
 a. Plot
 ```{r}
 lambda <- 1/100
-X <- seq(0,1000, length.out = 1001)
-fX <- dexp(X, rate = lambda)
+X <- seq(-500,0, length.out = 1001)
+fX <- (1/100) * exp(X/100)
 plot(X, fX, type = 'l', main = 'X ~ exp(lambda = 1/100)', xlab = 'x', ylab = 'density')
 ```
 
-b. Support of X is (0,infiniti)
+b. Support of X is the range (-infiniti, 0)
 
 
 3. Y ~ N(mu = 20, var = 16)
@@ -66,3 +66,9 @@ is at the value y = 20).
 ```{r}
 dnorm(20, mu, sdev)
 ```
+
+F(20) = 
+```{r}
+pnorm(20, mu, sdev)
+```
+
