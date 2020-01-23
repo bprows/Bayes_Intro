@@ -1,0 +1,74 @@
+---
+title: "Homework 2"
+author: "Broderick Prows"
+date: "1/15/2020"
+output: html_document
+---
+
+1. X ~ Binom(n = 7, p = .6)
+a. Plot
+```{r}
+p <- .6
+n <- 7
+X <- 0:7
+pX <- dbinom(X, n, p)
+plot(X, pX, pch = 19, main = 'X ~ Binom(n = 7, p = .6)', xlab = 'x', ylab = 'P(X=x)')
+```
+
+b. Mean of X:
+```{r}
+EX <- sum(X * pX)
+print(EX)
+print(c('Alternatively: n*p = ', n*p))
+```
+
+c. Support of X: {0, 1, 2, 3, 4, 5, 6, 7}
+
+
+2. f(x) = (1/100)exp(x/100) for x > 0
+a. Plot
+```{r}
+lambda <- 1/100
+X <- seq(-500,0, length.out = 1001)
+fX <- (1/100) * exp(X/100)
+plot(X, fX, type = 'l', main = 'X ~ exp(lambda = 1/100)', xlab = 'x', ylab = 'density')
+```
+
+b. Support of X is the range (-infiniti, 0)
+
+
+3. Y ~ N(mu = 20, var = 16)
+a. sd(Y) = 4
+b. P(Y < 28.4)
+```{r}
+mu <- 20
+sdev <- 4
+pnorm(28.4, mu, sdev)
+```
+
+c. P(Y > 14)
+```{r}
+1 - pnorm(14, mu, sdev)
+```
+
+d. P(17.4 < Y ≤ 23.9)
+```{r}
+pnorm(23.9, mu, sdev) - pnorm(17.4, mu, sdev)
+```
+
+e. 25th Percentile
+```{r}
+qnorm(.25, mu, sdev)
+```
+
+f. The probability density at the distribution’s mode (i.e., what is f(20), because’s the distribution’s peak
+is at the value y = 20).
+```{r}
+dnorm(20, mu, sdev)
+```
+
+F(20) = 
+```{r}
+pnorm(20, mu, sdev)
+```
+

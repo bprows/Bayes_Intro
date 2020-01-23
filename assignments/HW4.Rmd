@@ -1,0 +1,163 @@
+---
+title: "HW4"
+author: "Broderick Prows"
+date: "1/23/2020"
+output: html_document
+---
+
+Do the following using R. You must also turn in a copy of your R code.
+(1) Plot the Binomial(n = 47, θ = 0.8) pmf. Make sure the plot is properly labeled.
+```{r}
+n <- 47
+theta <- 0.8
+X <- 1:n
+fX <- dbinom(X,n,theta)
+plot(X, fX, type = 'h', lwd = 3, main = 'X~Binom(47,0.8)', xlab = 'X', ylab = 'f(x) (Density)')
+```
+
+(2) What is the expected value of a Binomial(n=47, θ = 0.8) random variable?
+```{r}
+n*theta
+```
+
+(3) What is the standard deviation of a Binomial(n = 47, θ = 0.8) random variable?
+```{r}
+sqrt(n*theta*(1-theta))
+```
+
+(4) Following are data from a clinical trial involving chemotherapy for testicular cancer. It is considered a success if a patient survived five years past the clinical trial. 3 subjects survived for five years past the trial, while 8 did not. What is the value of the (binomial) likelihood that 3 successes occur in 11 trials if θ (the probability of survival) is 0.5?
+```{r}
+dbinom(3,11,.5)
+```
+
+(5) Refer to question 4. What is the value of the likelihood if θ is 0.31?
+```{r}
+dbinom(3,11,.31)
+```
+
+(6) Refer to question 4. What is the value of the likelihood if θ is 0.27?
+```{r}
+dbinom(3,11,.27)
+```
+
+(7) Refer to question 4. Justify why you cannot find a value for θ that makes the likelihood larger than when θ = 3/11.
+The MLE of a binomial is $ \hat{p} = x/n $
+```{r pressure, echo=FALSE, fig.cap="Insert Proof", out.width = '100%'}
+knitr::include_graphics("picture.jpg", )
+```
+
+(8) Plot a beta(3, 5) pdf and a beta(5, 11) pdf on the same graph; the beta(3,5) should be in black and the beta(5,11) in gray. Also, be sure to properly format this graphic (x- and y-axes, overall title, and a legend).
+```{r}
+X <- seq(0,1,length.out=1001)
+plot(X,dbeta(X,shape1 = 5, shape2 = 11), 
+     col = 'black', lwd = 2, type = 'l',
+     main = 'Beta(3,5) & Beta(5,11)',
+     xlab = 'X',
+     ylab = 'f(x)')
+lines(X,dbeta(X, shape1 = 3, shape2 = 5),
+      col = 'gray', lwd = 2)
+legend(.75, 3, legend=c("Beta(5,11)", "Beta(3,5)"),
+       col=c("black", "gray"), lty = 1, lwd = 2, cex = 1)
+
+```
+
+(9) What is the height of the curve of a beta (1, 8) distribution at x = .24? That is, what is the pdf evaluated at x=.24?
+```{r}
+dbeta(.24, shape1 = 1, shape2 = 8)
+```
+
+(10) What is the probability a beta (1, 8) random variable is less than 0.13?
+```{r}
+pbeta(.13, shape1 = 1, shape2 = 8)
+```
+
+(11) What is the probability a beta (3, 9) random variable is greater than .4?
+```{r}
+1 - pbeta(.4, shape1 = 3, shape2 = 9)
+```
+
+(12) What is the probability a beta (18,4.4) random variable is between 0.6 and 0.7?
+```{r}
+pbeta(.7,shape1 = 18, shape2 = 4.4) - pbeta(.6,shape1 = 18, shape2 = 4.4)
+```
+
+(13) At what value of x is the probability that a beta (4, 7) random varable is less than x equal to .71? That is, for what x is $\Pr(beta(4, 7) < x) = .71$?
+```{r}
+qbeta(.71, shape1 = 4, shape2 = 7)
+```
+
+(14) At what value of x is the probability that a beta (12.2, 25.7) random variable is less than x equal to .2? That is, for what x is $\Pr(beta(12.2, 25.7) < x) = .2$?
+```{r}
+qbeta(.2, shape1 = 12.2, shape2 = 25.7)
+```
+
+(15) What is the expected value of a beta (3.1,4.8) random variable?
+```{r}
+a <- 3.1
+b <- 4.8
+a / (a+b)
+```
+
+(16) What is the variance of a beta (3, 5) random variable?
+```{r}
+a <- 3
+b <- 5
+(a*b) / (((a+b)**2) * ((a+b+1)))
+```
+
+(17) What is the mode of a beta(2.8, 2.1) random variable?
+```{r}
+a <- 2.8
+b <- 2.1
+(a−1) / (a+b−2)
+```
+
+(18) Show that the mode of a beta(a,b) random variable is $(a−1) / (a+b−2)$ when a > 1 and a + b > 2.
+```{r, echo=FALSE, fig.cap="Insert Proof", out.width = '100%'}
+knitr::include_graphics("pic.jpg")
+```
+
+(19) Refer again to question 4. In general terms, what is the posterior distribution for θ given the results of the clinical trial described in question 4 and assuming a beta(a,b) prior distribution for θ. 
+$$ \pi(a,b | y) \sim Beta(a+3, b+11) $$
+
+(20) Refer again to question 4. For this problem and assuming a beta(a,b) prior, what is 
+$$\int_0^1 f(y|θ)π(θ)~dθ $$ 
+```{r}
+
+```
+
+(21) Refer again to question 4. Create one figure with two plots (i.e., use par(mfrow=c(1,2))). Each plot will contain two curves, a red one representing the prior distribution of θ and a blue representing the posterior distribution of θ. For the left plot, use a beta(1,1) prior distribution. Comment on what this prior distribution implies regarding prior beliefs of the analyst and the impact it has on the posterior. For the right plot, use a beta(25,1) prior distribution. Comment on what this prior distribution implies regarding prior beliefs of the analyst and the impact it has on the posterior.
+```{r}
+par(mfrow=c(1,2))
+x <- 3
+n <- 11
+X <- seq(0,1,length.out=1001)
+prior1 <- dbeta(X,shape1=1,shape2=1)
+post1 <- dbeta(X,shape1=1+x, shape2=1+n)
+plot(X,post1, 
+     col = 'blue', lwd = 2, type = 'l',
+     main = 'Prior: Beta(1,1)',
+     xlab = 'X',
+     ylab = 'f(x)')
+lines(X,prior1,
+      col = 'red', lwd = 2)
+legend(.4, 3.5, legend=c("Prior", "Posterior"),
+       col=c("red", "blue"), lty = 1, lwd = 2, cex = 1)
+
+prior2 <- dbeta(X,shape1=25,shape2=1)
+post2 <- dbeta(X,shape1=25+x, shape2=1+n)
+plot(X,prior2, 
+     col = 'blue', lwd = 2, type = 'l',
+     main = 'Prior: Beta(25,1)',
+     xlab = 'X',
+     ylab = 'f(x)')
+lines(X,post2,
+      col = 'red', lwd = 2)
+legend(0, 25, legend=c("Prior", "Posterior"),
+       col=c("red", "blue"), lty = 1, lwd = 2, cex = 1)
+```
+
+
+
+
+
