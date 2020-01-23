@@ -37,3 +37,10 @@ plot(X, fX, type = 'l', lwd = 2, xlab = expression(theta), ylab = 'Density', mai
 fX <- dbeta(X, shape1=.5, shape2=.5)
 plot(X, fX, type = 'l', lwd = 2, xlab = expression(theta), ylab = 'Density', main = "Beta(.5,.5)")
 
+par(mfrow=c(1,1))
+plot(X,dbeta(X,shape1 = 100, shape2 = 74), type = 'l', lwd=2, 
+     xlab = expression(theta), ylab = "Density", main = "Beta")
+lines(X,dbeta(X,shape1=1,shape2=1), type = 'l', lwd = 2, col = 'blue')
+lines(X,dbeta(X,shape1=3,shape2=7), type = 'l', lwd = 2, col = 'red')
+
+
