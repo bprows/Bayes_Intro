@@ -43,4 +43,36 @@ plot(X,dbeta(X,shape1 = 100, shape2 = 74), type = 'l', lwd=2,
 lines(X,dbeta(X,shape1=1,shape2=1), type = 'l', lwd = 2, col = 'blue')
 lines(X,dbeta(X,shape1=3,shape2=7), type = 'l', lwd = 2, col = 'red')
 
+#### Example ####
+# Theta = proportion of US transportation workers under the influence. 
+# Prior: theta ~ Beta(1.4, 23.6)
+X <- seq(0,1,length.out=1001)
+a <- 1.4
+b <- 23.6
+pi_theta <- dbeta(X,shape1=a,shape2=b)
+plot(X,pi_theta,
+     main = "Proportion of US Transportation workers under the influence",
+     xlab = expression(theta),
+     ylab = 'density',
+     type = 'l', lwd = 2)
+
+# E(theta): a / (a+b)
+a / (a+b)
+# Prior Mode: a-1 / a+b-2
+(a-1) / (a+b-2)
+# prior Interval
+qbeta(c(0.0275,0.975),shape1 = a, shape2 = b)
+
+# collect Data: n = 12 x = 3
+a_star <- a+3
+b_star <- b + 9
+post_theta <- dbeta(X,shape1 = a_star, shape2 = b_star)
+lines(X,post_theta, type = 'l', lwd = 2, col = 'red')
+# E(theta): a / (a+b)
+a_star / (a_star+b_star)
+# Prior Mode: a-1 / a+b-2
+(a_star-1) / (a_star+b_star-2)
+# prior Interval
+qbeta(c(0.0275,0.975),shape1 = a_star, shape2 = b_star)
+
 
