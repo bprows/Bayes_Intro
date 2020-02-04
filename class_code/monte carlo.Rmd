@@ -1,0 +1,59 @@
+---
+title: "Monte Carlo"
+author: "Broderick Prows"
+date: "1/30/2020"
+output: html_document
+---
+
+Estimating $\pi$
+```{r}
+pi
+```
+
+
+```{r}
+sample_size <- 1
+x <- runif(sample_size)
+y <- runif(sample_size)
+4*mean(x**2 + y**2 <= 1)
+```
+
+Can also use Monte Carlo to estimate percentiles. Suppose X ∼ N(200, 182). 
+(`r qnorm(.80, mean=200, sd=18)`)
+```{r}
+sim_vals <- rnorm(15000,mean = 200, sd = 18)
+quantile(sim_vals, .80)
+```
+
+Theta1 and Theta2, Comparing the differences
+```{r}
+theta1s <- rbeta(6000, 75, 123)
+theta2s <- rbeta(6000, 91, 53)
+diffs = theta1s - theta2s
+mean(diffs)
+```
+
+95% Credible interval
+```{r}
+quantile(diffs, c(0.025, 0.975))
+```
+Since the interval does not catch 0, there is a statistically significant difference. 
+
+Estimated Posterior Probability that theta2 exceeds theta1 by at least 0.2
+```{r}
+mean(diffs <= -0.2)
+```
+
+Density Plot
+```{r}
+t1s <- rbeta(1000000, 75,123)
+t2s <- rbeta(1000000,91,53)
+plot(density(t1s-t2s),
+xlab=expression(theta[1]-theta[2]),
+main=expression(paste("Estimated Posterior Density of ",
+theta[1], "-", theta[2]), sep=""))
+```
+
+
+
+
