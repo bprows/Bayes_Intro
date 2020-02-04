@@ -6,6 +6,7 @@ output: html_document
 ---
 
 Do the following using R. You must also turn in a copy of your R code.
+
 (1) Do opposites attract? Three Duke undergraduates conducted a study of this question in 1993. They asked questions of 28 female undergraduates concerning their own personalities. These included the following five questions: Are you 1. introverted, 2. easy-going, 3. studious, 4. serious, 5. gregarious? They asked the same five questions about the respondent’s ideal mates. Take “opposites attract” to mean that the respondent answers differently for their ideal mates than they do for themselves in at least two of the five questions. In this sample of 28, only 8 were attracted to opposites. Deeming this to be a random sample of Duke undergraduates, report and interpret in context a 90% posterior credible interval for the population proportion of those attracted to opposites. Use a beta(1, 1) prior density.
 ```{r}
 prior_a <- 1
@@ -72,12 +73,12 @@ Since this interval does not include .10, we can conclude that left-handers are 
 
 (d) Find the posterior probability that θ is greater than 10%.
 ```{r}
-
+1 - pbeta(.10, shape1 = a_star, shape2 = b_star)
 ```
 
 (e) What is the posterior expected value of θ?
 ```{r}
-
+a_star / (a_star + b_star)
 ```
 
 (3) In a Newsweek poll taken on February 18-19, 1993, of 753 adults who were asked, “Would you favor additional taxes to pay for reforming and expanding health care in the United States?” 65% (or 489) said “yes.” Assuming a beta(20,20) prior density, report and interpret in context a 95% credible interval for the population proportion who would have answered “yes.”
@@ -153,7 +154,8 @@ posterior <- dbeta(Theta, shape1=a_star, shape2=b_star)
 ```{r}
 plot(Theta,posterior, xlab=expression(theta),ylab='density',main='Posterior',type='l',lwd=2)
 lines(Theta, dbeta(Theta, shape1=prior_a, shape2=prior_b), col = 'gray')
-## Add Legend
+legend("topright", legend=c("Posterior", "Prior"),
+       col=c("black", "gray"), lty = 1, lwd = 2, cex = 1)
 ```
 
 (c) Find a 99.5% (posterior) credible interval for this proportion.
@@ -176,26 +178,22 @@ pnorm(-13, mean = -10, sd = sqrt(42))
 
 (b) 90% (posterior) credible interval for θ if Y |θ ∼ Binomial(42, θ), θ ∼ Beta(5.8, 7.1), and y = 19.
 ```{r}
-n <- 10000
-sim_theta <- rbeta(10000, shape1 = 5.8, shape2 = 7.1)
-sim_ys <- rbinom(n, size = 42, prob = sim_theta)
-plot(density(sim_ys))
-
-#mean(sim_ys == 19)
-```
-
-```{r}
+n <- 100000
 prior_a <- 5.8
 prior_b <- 7.1
 n <- 42
 y <- 19
 
-a_star <- prior_a + x
-b_star <- prior_b + n - x
+a_star <- prior_a + y
+b_star <- prior_b + n - y
 
+sim_theta <- rbeta(n, shape1 = a_star, shape2 = b_star)
+quantile(sim_theta, c(.05, .95))
+```
+
+```{r}
 Theta <- seq(0,1,length.out=1001)
 posterior <- dbeta(Theta, shape1=a_star, shape2=b_star)
-
 interval <- c(qbeta(.05,shape1=a_star,shape2=b_star), qbeta(.95,shape1=a_star,shape2=b_star))
 interval
 ```
