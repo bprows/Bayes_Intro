@@ -32,7 +32,7 @@ text(interval[1]-.05, dbeta(interval[1],a_star,b_star), round(interval[1], 3))
 text(interval[2]+.05, dbeta(interval[2],a_star,b_star), round(interval[2], 3))
 ```
 
-There is a 90% chance that the true proportion of opposites attracting is between .172 and .443.
+There is a 90% probability that the true proportion of opposites attracting is between .172 and .443.
 
 (2) A study by Charles J. Graham and others at Arkansas Children’s Hospital in Little Rock addressed the question of whether left-handed children are more accident prone than right-handed children. Of 267 children between the ages of 6 and 18 who were admitted to a pediatric emergency room for trauma, 44 of them (or 16.5%) were indeed left-handed. The investigators claimed that about 10% of all children are left-handed. (Indeed, this was about the proportion of children who were admitted to the same emergency room for nontrauma reasons.) Consider the population of all pediatric trauma patients. Let θ represent the proportion of all pediatric trauma patients who are left-handed. Assume the beta(2, 18) prior density for θ.
 (a) For the Beta(2, 18) prior density, what is the a priori expected value of θ?
@@ -149,13 +149,14 @@ posterior <- dbeta(Theta, shape1=a_star, shape2=b_star)
 
 ```
 
+$\theta$ ~ $Beta(3,22)$
 
 (b) Plot the prior (in gray) and the posterior (in black) densities on the same graph, and properly format this graph (including a legend to identify the prior and posterior).
 ```{r}
 plot(Theta,posterior, xlab=expression(theta),ylab='density',main='Posterior',type='l',lwd=2)
 lines(Theta, dbeta(Theta, shape1=prior_a, shape2=prior_b), col = 'gray')
 legend("topright", legend=c("Posterior", "Prior"),
-       col=c("black", "gray"), lty = 1, lwd = 2, cex = 1)
+       col=c("black", "gray"), lty = 1, lwd = 2, cex = 1, inset = .05)
 ```
 
 (c) Find a 99.5% (posterior) credible interval for this proportion.
