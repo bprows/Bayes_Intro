@@ -1,0 +1,24 @@
+---
+title: "Predictive Distributions"
+output: html_notebook
+---
+
+Function to 
+```{r}
+prior_predictive <- function(y, n, a, b) {
+  l.f.y <- lgamma(a+b) - lgamma(a) - lgamma(b) + lchoose(n,y) + lgamma(a+y) + lgamma(b+n-y) - lgamma(a+b+n)
+  return(exp(l.f.y))
+}
+```
+
+```{r}
+y_vals <- 0:10
+f_y <- prior_predictive(y_vals,n=10,a=100,b=100)
+f_y
+```
+
+
+```{r}
+plot(y_vals,zapsmall(f_y),type = 'h',lwd=3)
+```
+
