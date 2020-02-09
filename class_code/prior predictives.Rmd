@@ -3,7 +3,7 @@ title: "Predictive Distributions"
 output: html_notebook
 ---
 
-Function to 
+Prior Predictive Distributions: Used to evaluate the validity of prior distribution
 ```{r}
 prior_predictive <- function(y, n, a, b) {
   l.f.y <- lgamma(a+b) - lgamma(a) - lgamma(b) + lchoose(n,y) + lgamma(a+y) + lgamma(b+n-y) - lgamma(a+b+n)
@@ -14,11 +14,24 @@ prior_predictive <- function(y, n, a, b) {
 ```{r}
 y_vals <- 0:10
 f_y <- prior_predictive(y_vals,n=10,a=100,b=100)
-f_y
+plot(y_vals,zapsmall(f_y),type = 'h',lwd=3)
 ```
 
-
+Posterior Predictive: Can be used to evaluate model after seeing some data
 ```{r}
-plot(y_vals,zapsmall(f_y),type = 'h',lwd=3)
+post_predictive <- function(y_new, n_new, a, b, y_obs, n_obs) {
+  
+  a_star <- a + y_obs
+  b_star <- b + n_obs - y_obs
+  
+  return( prior_predictive(y_new, n_new, a_star, b_star) )
+}
+```
+
+Using Monte Carlo:
+```{r}
+pr.pred <- rbinom(10000, 10, rbeta(10000, 1, 1))
+hist(pr.pred,col = 'gray')
+plot(table(pr.pred)/10000)
 ```
 
