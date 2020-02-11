@@ -7,6 +7,10 @@ output: html_document
 
 Do the following using R. You must also turn in a copy of your R code.
 
+### Part 1 ###
+
+During the 1940s and 1950s, Ted Williams played baseball for the Boston Red Sox and Joe DiMaggio played for the New York Yankees. They were regarded as among the best players of their day, and the question of who was better was the subject of many heated arguments among baseball aficionados. Williams had the better batting record. Was he in fact a better hitter? Their major league career statistics are given in Table 1.
+
 ```{r, echo = F}
 library(knitr)
 library(kableExtra)
@@ -20,9 +24,6 @@ kable(tab1, align = 'c', row.names = F,
       caption = "Table 1. Career Major League Baseball Statistics for Ted Williams and Joe DiMaggio") %>%
   kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 ```
-
-
-During the 1940s and 1950s, Ted Williams played baseball for the Boston Red Sox and Joe DiMaggio played for the New York Yankees. They were regarded as among the best players of their day, and the question of who was better was the subject of many heated arguments among baseball aficionados. Williams had the better batting record. Was he in fact a better hitter? Their major league career statistics are given in Table 1.
 
 Assume that at-bats are exchangeable for each player. (This assumption is only approximately correct for me. Players learn, change their batting style from time to time, and get older. Moreover, they do not always play in the same ball park, against the same pitcher, in the same weather, the style of ball may change, and so on. But the assumption may not be far off. And if we do not assume something, we will not be able to draw any conclusions!)
 
@@ -91,49 +92,182 @@ mean(diffs > 0)
 
 (e) Based on the answers to the previous four parts, what conclusion(s) if any should the fan draw in comparing the two baseball players? Be sure to thoroughly explain your answer.
 
-The probability the Williams is a better hitter (both hits and home runs) is so high that we cna conclude that Williams was a better hitter than Dimaggio, assuming that every at-bat is interchangable.
+
+The probability the Williams is a better hitter (both hits and home runs) is so high that we can conclude that Williams was a better hitter than Dimaggio, assuming that every at-bat is interchangable.
 
 
-(2) To reinforce your understanding of prior-predictive distributions and posterior-predictive distributions we now
-consider predictions from the same baseball example. In baseball, one of the revered accomplishments is
-to have a batting average of .400 or above (baseball statistics always use three decimal places for a batting
-average) over the course of a season. This means that a player gets a hit in at least 40.0% of their at-bats
-during that season. As before, let θW represent the “true proportion” of hits for Ted Williams. We assume
-that Williams’ “true” but unobservable probability of getting a hit, θW , was constant over the course of his
-career (though, as discussed previously, there are reasons to doubt this assumption). Throughout all parts
-of this problem of the homework, we assume a Beta(50, 120) prior distribution for θW .
-(a) Suppose we knew that Williams would have five at bats in his first career game. What is the priorpredictive probability that Williams would have at least a .400 (recorded) batting average after this first
-game? (That is, what is the prior predictive probability he gets at least two hits in his first five at bats, so
-that his recorded average is at least 2/5 =.400?) Recall that we assume the at-bats are conditionally iid,
-so that Ynew, first game|θW ∼ Binomial(nnew, first game = 5, θW ). Calculate the probability EXACTLY.
-(b) Refer to the previous question. Now, ESTIMATE the requested probability by appropriately using Monte
-Carlo.
-1
-2 HOMEWORK 6, STAT 251
-(c) Suppose we knew that Williams would have 605 at bats in his first career season. What is the priorpredictive probability that Williams would have at least a .400 (recorded) batting average after this first
-season? Calculate this probability exactly.
-(d) Refer to the previous question. Now, ESTIMATE the requested probability by appropriately using Monte
-Carlo.
-(e) The table of Williams’ actual batting career is provided above. We will suppose he had the chance to play
-one extra game right after this career, and that he would have five at-bats. Given our prior beliefs about
-θW and then the observed data from the table below, what is the probability that Williams would get at
-least two hits if he were to play one extra game at the end of his career, and we knew that he would have
-five at-bats? Calculate this posterior probability exactly.
-(f) Refer to the previous question. Now, ESTIMATE the requested probability by appropriately using Monte
-Carlo.
-(g) We will suppose he had the chance to play one extra season right after his career, and that he would have
-605 at-bats. Given our prior beliefs about θW and then the observed data from the table below, what is
-the probability that Williams would have a recorded batting average of at least .400 in this new season?
-Calculate this probability exactly. (Hint: we need the probability he would get at least 242 hits in the
-605 new at-bats.)
-(h) Refer to the previous question. Now, ESTIMATE the requested probability by appropriately using Monte
-Carlo.
-(i) Repeat the previous eight questions for Joe DiMaggio. We will use the same prior distribution for θD
-(i.e., the Beta(50, 120) distribution), but the posterior will be different because of DiMaggio’s different
-batting record.
-(j) What is the probability that at the beginning of their careers, (so using prior -predictive distributions)
-that Williams’ recorded batting average would be strictly better than DiMaggio’s if each had 605 at bats
-in their first season? Use Monte Carlo.
-(k) What is the probability that after their careers, (so using posterior -predictive distributions) that Williams’
-recorded season average in a new season with 605 at bats would be strictly better than DiMaggio’s recorded
-season average in a new season with 605 at bats?
+### Part 2 ###
+
+
+To reinforce your understanding of prior-predictive distributions and posterior-predictive distributions we now consider predictions from the same baseball example. In baseball, one of the revered accomplishments is to have a batting average of .400 or above (baseball statistics always use three decimal places for a batting average) over the course of a season. This means that a player gets a hit in at least 40.0% of their at-bats during that season. As before, let θW represent the “true proportion” of hits for Ted Williams. We assume that Williams’ “true” but unobservable probability of getting a hit, θW , was constant over the course of his career (though, as discussed previously, there are reasons to doubt this assumption). Throughout all parts of this problem of the homework, we assume a Beta(50, 120) prior distribution for θW.
+
+(a) Suppose we knew that Williams would have five at bats in his first career game. What is the prior predictive probability that Williams would have at least a .400 (recorded) batting average after this first game? (That is, what is the prior predictive probability he gets at least two hits in his first five at bats, so that his recorded average is at least 2/5 =.400?) Recall that we assume the at-bats are conditionally iid, so that Ynew, first game|θW ∼ Binomial(nnew, first game = 5, θW ). Calculate the probability EXACTLY.
+```{r}
+prior_predictive <- function(ynew, nnew, a, b) {
+  l.f.y <- lgamma(a+b) - lgamma(a) - lgamma(b) + lchoose(nnew,ynew) + 
+    lgamma(a+ynew) + lgamma(b+nnew-ynew) - lgamma(a+b+nnew)
+  return(exp(l.f.y))
+}
+```
+
+
+```{r}
+p_a <- 50
+p_b <- 120
+n_new <- 5
+y_cutoff <- n_new * .4 - 1
+1 - sum(prior_predictive(ynew = 0:y_cutoff, nnew = n_new, a = p_a, b = p_b))
+```
+
+(b) Refer to the previous question. Now, ESTIMATE the requested probability by appropriately using Monte Carlo.
+```{r}
+J <- 10000
+y_new <- rbinom(J, n_new, rbeta(J, shape1 = p_a, shape2 = p_b))
+mean(y_new > y_cutoff)
+```
+
+
+(c) Suppose we knew that Williams would have 605 at bats in his first career season. What is the priorpredictive probability that Williams would have at least a .400 (recorded) batting average after this first season? Calculate this probability exactly.
+```{r}
+p_a <- 50
+p_b <- 120
+n_new <- 650
+y_cutoff <- n_new * .4 - 1
+1 - sum(prior_predictive(ynew = 0:y_cutoff, nnew = n_new, a = p_a, b = p_b))
+```
+
+(d) Refer to the previous question. Now, ESTIMATE the requested probability by appropriately using Monte Carlo.
+```{r}
+J <- 10000
+y_new <- rbinom(J, n_new, rbeta(J, shape1 = p_a, shape2 = p_b))
+mean(y_new > y_cutoff)
+```
+
+(e) The table of Williams’ actual batting career is provided above. We will suppose he had the chance to play one extra game right after this career, and that he would have five at-bats. Given our prior beliefs about θW and then the observed data from the table below, what is the probability that Williams would get at least two hits if he were to play one extra game at the end of his career, and we knew that he would have five at-bats? Calculate this posterior probability exactly.
+```{r}
+p_a <- 50
+p_b <- 120
+a_star <- p_a + hits_w
+b_star <- p_b + ab_w - hits_w
+n_new <- 5
+y_cutoff <- n_new * .4 - 1
+1 - sum(prior_predictive(ynew = 0:y_cutoff, nnew = n_new, a = a_star, b = b_star))
+```
+
+(f) Refer to the previous question. Now, ESTIMATE the requested probability by appropriately using Monte Carlo.
+```{r}
+J <- 10000
+y_new <- rbinom(J, n_new, rbeta(J, shape1 = a_star, shape2 = b_star))
+mean(y_new > y_cutoff)
+```
+
+(g) We will suppose he had the chance to play one extra season right after his career, and that he would have 605 at-bats. Given our prior beliefs about θW and then the observed data from the table below, what is the probability that Williams would have a recorded batting average of at least .400 in this new season? Calculate this probability exactly. (Hint: we need the probability he would get at least 242 hits in the 605 new at-bats.)
+```{r}
+p_a <- 50
+p_b <- 120
+a_star <- p_a + hits_w
+b_star <- p_b + ab_w - hits_w
+n_new <- 605
+y_cutoff <- n_new * .4 - 1
+1 - sum(prior_predictive(ynew = 0:y_cutoff, nnew = n_new, a = a_star, b = b_star))
+```
+
+(h) Refer to the previous question. Now, ESTIMATE the requested probability by appropriately using Monte Carlo.
+```{r}
+J <- 10000
+y_new <- rbinom(J, n_new, rbeta(J, shape1 = a_star, shape2 = b_star))
+mean(y_new > y_cutoff)
+```
+
+(i) Repeat the previous eight questions for Joe DiMaggio. We will use the same prior distribution for θD (i.e., the Beta(50, 120) distribution), but the posterior will be different because of DiMaggio’s different batting record.
+
+(a) First Game
+```{r}
+p_a <- 50
+p_b <- 120
+n_new <- 5
+y_cutoff <- n_new * .4 - 1
+1 - sum(prior_predictive(ynew = 0:y_cutoff, nnew = n_new, a = p_a, b = p_b))
+```
+
+(b) Refer to the previous question. Now, ESTIMATE the requested probability by appropriately using Monte Carlo.
+```{r}
+J <- 10000
+y_new <- rbinom(J, n_new, rbeta(J, shape1 = p_a, shape2 = p_b))
+mean(y_new > y_cutoff)
+```
+
+(c) First Season (605 at bats)
+```{r}
+p_a <- 50
+p_b <- 120
+n_new <- 650
+y_cutoff <- n_new * .4 - 1
+1 - sum(prior_predictive(ynew = 0:y_cutoff, nnew = n_new, a = p_a, b = p_b))
+```
+
+(d) Refer to the previous question. Now, ESTIMATE the requested probability by appropriately using Monte Carlo.
+```{r}
+J <- 10000
+y_new <- rbinom(J, n_new, rbeta(J, shape1 = p_a, shape2 = p_b))
+mean(y_new > y_cutoff)
+```
+
+(e) Extra Game (5 AB)
+```{r}
+p_a <- 50
+p_b <- 120
+a_star <- p_a + hits_d
+b_star <- p_b + ab_d - hits_d
+n_new <- 5
+y_cutoff <- n_new * .4 - 1
+1 - sum(prior_predictive(ynew = 0:y_cutoff, nnew = n_new, a = a_star, b = b_star))
+```
+
+(f) Refer to the previous question. Now, ESTIMATE the requested probability by appropriately using Monte Carlo.
+```{r}
+J <- 10000
+y_new <- rbinom(J, n_new, rbeta(J, shape1 = a_star, shape2 = b_star))
+mean(y_new > y_cutoff)
+```
+
+(g) One Extra Season (605 AB)
+```{r}
+p_a <- 50
+p_b <- 120
+a_star <- p_a + hits_w
+b_star <- p_b + ab_w - hits_w
+n_new <- 605
+y_cutoff <- n_new * .4 - 1
+1 - sum(prior_predictive(ynew = 0:y_cutoff, nnew = n_new, a = a_star, b = b_star))
+```
+
+(h) Refer to the previous question. Now, ESTIMATE the requested probability by appropriately using Monte Carlo.
+```{r}
+J <- 10000
+y_new <- rbinom(J, n_new, rbeta(J, shape1 = a_star, shape2 = b_star))
+mean(y_new > y_cutoff)
+```
+
+(j) What is the probability that at the beginning of their careers, (so using prior -predictive distributions) that Williams’ recorded batting average would be strictly better than DiMaggio’s if each had 605 at bats in their first season? Use Monte Carlo.
+```{r}
+J <- 10000
+n_new <- 650
+y_w <- rbinom(J, n_new, rbeta(J, shape1 = p_a, shape2 = p_b))
+y_d <- rbinom(J, n_new, rbeta(J, shape1 = p_a, shape2 = p_b))
+mean(y_w > y_d)
+```
+
+(k) What is the probability that after their careers, (so using posterior -predictive distributions) that Williams’ recorded season average in a new season with 605 at bats would be strictly better than DiMaggio’s recorded season average in a new season with 605 at bats?
+```{r}
+J <- 10000
+n_new <- 650
+a_star_w <- p_a + hits_w
+b_star_w <- p_b + ab_w - hits_w
+a_star_d <- p_a + hits_d
+b_star_d <- p_b + ab_d - hits_d
+y_w <- rbinom(J, n_new, rbeta(J, shape1 = a_star_w, shape2 = b_star_w))
+y_d <- rbinom(J, n_new, rbeta(J, shape1 = a_star_d, shape2 = b_star_d))
+mean(y_w > y_d)
+```
+
