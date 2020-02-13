@@ -2,12 +2,13 @@
 title: "Homework 6"
 author: "Broderick Prows"
 date: "2/8/2020"
-output: html_document
+output:
+  html_document
 ---
 
 Do the following using R. You must also turn in a copy of your R code.
 
-### Part 1 ###
+Part 1
 
 During the 1940s and 1950s, Ted Williams played baseball for the Boston Red Sox and Joe DiMaggio played for the New York Yankees. They were regarded as among the best players of their day, and the question of who was better was the subject of many heated arguments among baseball aficionados. Williams had the better batting record. Was he in fact a better hitter? Their major league career statistics are given in Table 1.
 
@@ -21,14 +22,13 @@ Joe DiMaggio, 6821, 2214, .3246, 361, .0529
 names(tab1) <- tab1[1,]
 tab1 <- tab1[-1,]
 kable(tab1, align = 'c', row.names = F,
-      caption = "Table 1. Career Major League Baseball Statistics for Ted Williams and Joe DiMaggio") %>%
+        caption = "Table 1. Career Major League Baseball Statistics for Ted Williams and Joe DiMaggio") %>%
   kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 ```
 
 Assume that at-bats are exchangeable for each player. (This assumption is only approximately correct for me. Players learn, change their batting style from time to time, and get older. Moreover, they do not always play in the same ball park, against the same pitcher, in the same weather, the style of ball may change, and so on. But the assumption may not be far off. And if we do not assume something, we will not be able to draw any conclusions!)
 
 (a) First consider hits. A baseball afficionado’s prior probabilities concerning these two players’ “true proportions” of hits are given by independent beta(a, b) densities, where a = 50 and b = 120. (The values of a and b we assume do not matter much. Both Williams and DiMaggio had so many at-bats that we would get about the same answer even if we were to assume a = b = 1.) Find this fan’s posterior probability (given the preceding career statistics) that Ted Williams was a better hitter than Joe DiMaggio. (Interpret better to mean that there was a higher proportion of hits in the Williams model.)
-$\theta _w$
 ```{r}
 p_a <- 50
 p_b <- 120
@@ -96,7 +96,7 @@ mean(diffs > 0)
 The probability the Williams is a better hitter (both hits and home runs) is so high that we can conclude that Williams was a better hitter than Dimaggio, assuming that every at-bat is interchangable.
 
 
-### Part 2 ###
+Part 2
 
 
 To reinforce your understanding of prior-predictive distributions and posterior-predictive distributions we now consider predictions from the same baseball example. In baseball, one of the revered accomplishments is to have a batting average of .400 or above (baseball statistics always use three decimal places for a batting average) over the course of a season. This means that a player gets a hit in at least 40.0% of their at-bats during that season. As before, let θW represent the “true proportion” of hits for Ted Williams. We assume that Williams’ “true” but unobservable probability of getting a hit, θW , was constant over the course of his career (though, as discussed previously, there are reasons to doubt this assumption). Throughout all parts of this problem of the homework, we assume a Beta(50, 120) prior distribution for θW.
