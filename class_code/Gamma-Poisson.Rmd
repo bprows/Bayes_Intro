@@ -50,9 +50,41 @@ col=c("black","red","maroon","blue"),
 lwd=2, lty=c(1,2,5,4)) 
 ```
 
+Suppose that we are considering the scoring ability of the 2016  YU women’s soccer team. Specifically, we are interested in θ = expected number of goals scored in a randomly selected game.
+I will assume that given θ, Y= number of goals scored in a game has the Poisson(θ) distribution.
+My prior distribution is the Gamma(shape=8, rate=3) distribution.
+```{r}
+x <- seq(0,10,length.out = 1001)
+plot(x, dgamma(x,shape = 8,rate = 3),
+     main = "Prior Distribution", xlab = expression(theta), ylab = 'density', type = 'l')
+```
 
+In first non-exhibition game, BYU won 2-1 over Washington State.
+With this match result, what is my posterior distribution?
+I assumed Y |θ ∼ Poisson(θ) and θ ∼ Gamma(a = 8, b = 3); observed y = 2.
+Posterior: θ|y ∼ Gamma(a* = a + y = 10, b* = b + 1 = 4).
+```{r}
+plot(x, dgamma(x,shape = 8+2,rate = 3+1),
+     main = "Posterior Distribution", xlab = expression(theta), ylab = 'density', type = 'l', col = 'blue')
+lines(x, dgamma(x,shape = 8,rate = 3),
+     main = "Prior Distribution", xlab = expression(theta), ylab = 'density', type = 'l')
+legend("topright", c("Prior", "Posterior"), col = c('black', 'blue'), lty = 1)
+```
 
+In the next game, they didn't score any goals
+```{r}
+plot(x, dgamma(x,shape = 8+2,rate = 3+1+1),
+     main = "Posterior Distribution", xlab = expression(theta), ylab = 'density', type = 'l', col = 'red')
+lines(x, dgamma(x,shape = 8+2,rate = 3+1), type = 'l', col = 'blue')
+lines(x, dgamma(x,shape = 8,rate = 3), type = 'l', col = 'gray')
+legend("topright", c("Prior", "Game 1", "Game 2"), col = c('black', 'blue', 'red'), lty = 1)
+```
 
+```{r}
+gp_predictive <- function(ynew, shape, rate = 1/scale, scale = 1/rate) {
+  (rate ** shape) * (gamma(ynew + shape)) / ( (1 + rate)**(ynew + shape) * factorial(ynew) * gamma(shape)) 
+}
+```
 
 
 
