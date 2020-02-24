@@ -62,6 +62,11 @@ $$ shape = 5.1 $$
 $$rate = \frac{1}{scale} = 1.25 $$
 
 (b) Derive the prior predictive distribution and use it to find the probability that in the next week there will be at least 3 accidents? What does this probability say about the appropriateness (or lack there of) of the prior distribution used by the Utah Highway Patrol?
+```{r, echo=FALSE, fig.cap="Poisson-Gamma Predictive", out.width = '100%'}
+knitr::include_graphics("./../pics/hw7-gp-pred.jpg")
+```
+
+
 ```{r}
 gp_predictive <- function(ynew, shape, rate = 1/scale, scale = 1/rate) {
   (rate ** shape) * (gamma(ynew + shape)) / ( (1 + rate)**(ynew + shape) * factorial(ynew) * gamma(shape)) 
