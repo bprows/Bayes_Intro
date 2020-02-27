@@ -41,7 +41,7 @@ print(interval)
 
 There is a 95% probability that the true proportion of individuals that notice baldness when meeting someone is between 0.617 and 0.677
 
-```{r}
+```{r, fig.align='center'}
 f_theta_post <- dbeta(thetas,shape1 = a_star, shape2 = b_star)
 plot(thetas, f_theta_post, type = 'l', col = 'black', 
      main = expression(paste('Posterior of ', theta)), 
@@ -53,14 +53,14 @@ text(interval[2]+.05, dbeta(interval[2],a_star,b_star), round(interval[2], 3))
 legend("topright", c("Posterior", "Prior"), col = c("black", "gray"), lty = 1)
 ```
 
-4. 
+4. Show that the posterior means is weighted average.
 ```{r, echo=FALSE, fig.cap="Posterior mean is a weighted average.", out.width = '100%'}
-knitr::include_graphics("./../pics/hw7-gp-pred.jpg")
+knitr::include_graphics("./../pics/quiz3-weights.jpg")
 ```
 
 5. Derive the Posterior Predictive 
 ```{r, echo=FALSE, fig.cap="Beta-Binomial Predictive", out.width = '100%'}
-#knitr::include_graphics("path/to/picture.jpeg")
+knitr::include_graphics("./../pics/quiz3 bb pred.jpg")
 ```
 
 ```{r}
