@@ -16,17 +16,26 @@ mapr <- c(97.6, 117.7, 126.7, 111.0, 106.7, 108.4, 118.9, 108.6, 119.1, 106.2)
 
 (a) Compute the log of the likelihood with $\mu = 112$ and $\sigma ^2 = 8.4^2$.
 ```{r}
-plnorm(log(mapr), meanlog = log(112), sdlog = log(8.4))
+mu <- 112
+sd_ <- 8.4
+sum( dnorm(mapr, mean = mu, sd = sd_, log= T))
 ```
 
 (b) Compute the log of the likelihood with $\mu = \bar{y}$ and $\sigma^2 = \frac{1}{n} \sum_{i=1}^{n}(y_{i} - \bar{y})^2$ where $\bar{y} \equiv \frac{1}{n} \sum_{i=1}^{n} y_{i}$
 ```{r}
-
+y_bar <- mean(mapr)
+sd_y <- sum((mapr - y_bar)**2) / length(mapr)
+sum( dnorm(mapr, mean = y_bar, sd = sqrt(sd_y), log= T))
 ```
 
-(c) Now plot the log of the likelihood for values of $\mu$ ranging from 110 to 114 in increments of .05, and with $\sigma ^2$ fixed at $\sigma^2 = \frac{1}{n} \sum_{i=1}^{n}(y_{i} - \bar{y})^2$ where $\bar{y} \equiv \frac{1}{n} \sum_{i=1}^{n} y_{i}$
+(c) Now plot the log of the likelihood for values of $\mu$ ranging from 110 to 114 in increments of .05, and with $\sigma^2$ fixed at $\sigma^2 = \frac{1}{n} \sum_{i=1}^{n}(y_{i} - \bar{y})^2$ where $\bar{y} \equiv \frac{1}{n} \sum_{i=1}^{n} y_{i}$
 ```{r}
-
+mus <- seq(110,114,by=0.05)
+ll_mu <- sapply(mus, function(x) sum( dnorm(mapr, mean = x, sd = sqrt(sd_y), log= T)))
+plot(mus, ll_mu, 
+     xlab = expression(mu), ylab = "Log-Likelihood", 
+     main = expression(paste("Maximizing ",mu)),
+     pch = 19)
 ```
 
 
