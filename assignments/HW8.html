@@ -369,13 +369,24 @@ summary {
 </div>
 
 
+<div id="part-1" class="section level3">
+<h3>Part 1</h3>
 <p>You have gathered mean arterial pressures from ten subjects currently being treated for high blood pressure with a specific drug regimen. You assume these data are (conditionally) normally distributed.</p>
 <pre class="r"><code>mapr &lt;- c(97.6, 117.7, 126.7, 111.0, 106.7, 108.4, 118.9, 108.6, 119.1, 106.2)</code></pre>
 <ol style="list-style-type: lower-alpha">
-<li><p>Compute the log of the likelihood with <span class="math inline">\(\mu = 112\)</span> and <span class="math inline">\(\sigma ^2 = 8.4^2\)</span>.</p></li>
+<li>Compute the log of the likelihood with <span class="math inline">\(\mu = 112\)</span> and <span class="math inline">\(\sigma ^2 = 8.4^2\)</span>.</li>
+</ol>
+<pre class="r"><code>plnorm(log(mapr), meanlog = log(112), sdlog = log(8.4))</code></pre>
+<pre><code>##  [1] 0.06654829 0.06901379 0.06997587 0.06824531 0.06772565 0.06793371
+##  [7] 0.06914651 0.06795796 0.06916849 0.06766378</code></pre>
+<ol start="2" style="list-style-type: lower-alpha">
 <li><p>Compute the log of the likelihood with <span class="math inline">\(\mu = \bar{y}\)</span> and <span class="math inline">\(\sigma^2 = \frac{1}{n} \sum_{i=1}^{n}(y_{i} - \bar{y})^2\)</span> where <span class="math inline">\(\bar{y} \equiv \frac{1}{n} \sum_{i=1}^{n} y_{i}\)</span></p></li>
 <li><p>Now plot the log of the likelihood for values of <span class="math inline">\(\mu\)</span> ranging from 110 to 114 in increments of .05, and with <span class="math inline">\(\sigma ^2\)</span> fixed at <span class="math inline">\(\sigma^2 = \frac{1}{n} \sum_{i=1}^{n}(y_{i} - \bar{y})^2\)</span> where <span class="math inline">\(\bar{y} \equiv \frac{1}{n} \sum_{i=1}^{n} y_{i}\)</span></p></li>
 </ol>
+<hr />
+</div>
+<div id="part-2" class="section level3">
+<h3>Part 2</h3>
 <p>The population variance of serum cholesterol measurements for urban residents of Guatemala is assumed to be 260. The prior belief about the serum cholesterol of residents of Guatemala is that the population mean, <span class="math inline">\(\mu_{urban}\)</span>, should have a mean of 150 with a variance of 90 (and the prior will be a normal distribution).</p>
 <p>Here is the total serum cholesterol for eight urban residents of Guatemala:</p>
 <pre class="r"><code>cholest.u &lt;- c(197, 199, 214, 217, 222, 227, 228, 234)</code></pre>
@@ -383,6 +394,10 @@ summary {
 <li><p>What is the posterior distribution of the mean, <span class="math inline">\(\mu_{urban}\)</span>, in this case if it is assumed that the data are conditionally iid with a normal distribution?</p></li>
 <li><p>Plot the posterior distribution from part (a).</p></li>
 </ol>
+<hr />
+</div>
+<div id="part-3" class="section level3">
+<h3>Part 3</h3>
 <p>The population variance is assumed to be 270. The prior belief about the serum cholesterol of residents of Guatemala is that the population mean, <span class="math inline">\(\mu_{rural}\)</span>, should have a mean of 150 with a variance of 90 (and be normally distributed).</p>
 <p>Here is the total serum cholesterol for ten rural residents of Guatemala:</p>
 <pre class="r"><code>cholest.r &lt;- c(139, 142, 143, 144, 145, 148, 155, 162, 171, 181)</code></pre>
@@ -390,11 +405,19 @@ summary {
 <li><p>What is the posterior distribution of the mean, <span class="math inline">\(\mu_{rural}\)</span>, in this case if it is assumed that the data are conditionally iid with a normal distribution?</p></li>
 <li><p>Plot the posterior distribution from part (a).</p></li>
 </ol>
+<hr />
+</div>
+<div id="part-4" class="section level3">
+<h3>Part 4</h3>
 <p>Extending the previous two questions, suppose that the urban data are also assumed to be independent of the rural data. Furthermore, assume that a priori <span class="math inline">\(\mu_{rural}\)</span> is independent of µurban. With these assumptions, <span class="math inline">\(\mu_{rural}\)</span> and <span class="math inline">\(\mu_{urban}\)</span> will also be independent of each other a posteriori. (a) What is the posterior distribution of <span class="math inline">\(\mu_{urban}\)</span> − <span class="math inline">\(\mu_{rural}\)</span>?</p>
 <ol start="2" style="list-style-type: lower-alpha">
 <li><p>Plot the prior and the posterior distribution of <span class="math inline">\(\mu_{urban}\)</span> − <span class="math inline">\(\mu_{rural}\)</span> on the same graph.</p></li>
 <li><p>State and interpret in the context of this problem the (central) 95% posterior credible interval for <span class="math inline">\(\mu_{urban}\)</span> − <span class="math inline">\(\mu_{rural}\)</span>.</p></li>
 </ol>
+<hr />
+</div>
+<div id="part-5" class="section level3">
+<h3>Part 5</h3>
 <p>The number of immature red tail hawks sitting on fence posts or power poles along a mile-long stretch of rural highway can reasonably be assumed to follow a Poisson distribution. However, we will be comparing data six years apart (in 2003 and then in 2009), and we suspect there might be differences in behavior between 2003 and 2009. Thus, we will assume the observations from 2003 follow the Poisson(<span class="math inline">\(\theta_{2003}\)</span>) distribution, and the observations from 2009 follow the Poisson(<span class="math inline">\(\theta_{2009}\)</span>) distribution. We’ll also assume the 2003 data are independent of the 2009 data. Assume that a priori <span class="math inline">\(\theta_{2003}\)</span> and <span class="math inline">\(\theta_{2009}\)</span> are independent of each other.</p>
 <p>Along a 10 mile stretch of highway south of Saratoga Springs in 2003, the count of hawks per mile was:</p>
 <pre class="r"><code>hawks.2003 &lt;- c(0, 2, 0, 0, 0, 4, 3, 0, 0, 1)</code></pre>
@@ -407,6 +430,7 @@ summary {
 <li><p>What is the 95% posterior credible interval for <span class="math inline">\(d\)</span>?</p></li>
 <li><p>Plot the Monte-Carlo estimated posterior distribution of <span class="math inline">\(d = \theta_{2009} - \theta_{2003}\)</span> by using the density and plot functions in R.</p></li>
 </ol>
+</div>
 
 
 
