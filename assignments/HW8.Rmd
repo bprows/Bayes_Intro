@@ -29,7 +29,7 @@ sum( dnorm(mapr, mean = y_bar, sd = sqrt(sd_y), log= T))
 ```
 
 (c) Now plot the log of the likelihood for values of $\mu$ ranging from 110 to 114 in increments of .05, and with $\sigma^2$ fixed at $\sigma^2 = \frac{1}{n} \sum_{i=1}^{n}(y_{i} - \bar{y})^2$ where $\bar{y} \equiv \frac{1}{n} \sum_{i=1}^{n} y_{i}$
-```{r}
+```{r,fig.align='center'}
 mus <- seq(110,114,by=0.05)
 ll_mu <- sapply(mus, function(x) sum( dnorm(mapr, mean = x, sd = sqrt(sd_y), log= T)))
 plot(mus, ll_mu, 
@@ -46,17 +46,47 @@ The population variance of serum cholesterol measurements for urban residents of
 
 Here is the total serum cholesterol for eight urban residents of Guatemala: 
 ```{r}
+pop_var_u <- 260
+m_u <- 150
+v_u <- 90
 cholest.u <- c(197, 199, 214, 217, 222, 227, 228, 234)
 ```
 
 (a) What is the posterior distribution of the mean, $\mu_{urban}$, in this case if it is assumed that the data are conditionally iid with a normal distribution?
 ```{r}
+m_update <- function(m,v,sigma2,y) { #v_star * (n/sigma2*y_bar + 1/v*m)
+  n <- length(y)
+  y_bar <- mean(y)
+  m_star <- (n*v*y_bar + sigma2*m) / (n*v + sigma2)
+  return(m_star)
+}
 
+v_update <- function(v,sigma2,y) {
+  n <- length(y)
+  v_star <- (v*sigma2) / (n*v + sigma2)
+  return(v_star)
+}
+
+m_star_u <- m_update(m_u,v_u,pop_var_u, cholest.u)
+v_star_u <- v_update(v_u,pop_var_u,cholest.u)
 ```
+Posterior of $\mu_{urban} \sim$ N(`r round(m_star_u,2)`, `r round(v_star_u,2)`).
+
 
 (b) Plot the posterior distribution from part (a).
-```{r}
-
+```{r,fig.align='center'}
+plot_normal <- function(mu, var_, main_title, x_lab, y_lab) {
+  sd_ <- sqrt(var_)
+  startx <- mu - 3*sd_
+  stopx <- mu + 3*sd_
+  xs <- seq(startx, stopx, length.out = 1001)
+  f_xs <- dnorm(xs, mean = mu, sd_)
+  plot(xs, f_xs, main = main_title, xlab = x_lab, ylab = y_lab, type = 'l')
+}
+plot_normal(m_star_u, v_star_u, 
+            expression(paste("Posterior of ", mu["urban"])),
+            expression(mu["urban"]),
+            "Density")
 ```
 
 
@@ -72,12 +102,20 @@ cholest.r <- c(139, 142, 143, 144, 145, 148, 155, 162, 171, 181)
 
 (a) What is the posterior distribution of the mean, $\mu_{rural}$, in this case if it is assumed that the data are conditionally iid with a normal distribution?
 ```{r}
-
+pop_var_r <- 270
+m_r <- 150
+v_r <- 90
+m_star_r <- m_update(m_r,v_r,pop_var_r,cholest.r)
+v_star_r <- v_update(v_r, pop_var_r,cholest.r)
 ```
+Posterior of $\mu_{rural} \sim$ N(`r round(m_star_r,2)`, `r round(v_star_r,2)`).
 
 (b) Plot the posterior distribution from part (a).
-```{r}
-
+```{r,fig.align='center'}
+plot_normal(m_star_r, v_star_r, 
+            expression(paste("Posterior of ", mu["rural"])),
+            expression(mu["rural"]),
+            "Density")
 ```
 
 
@@ -85,21 +123,50 @@ cholest.r <- c(139, 142, 143, 144, 145, 148, 155, 162, 171, 181)
 ### Part 4 ###
 
 Extending the previous two questions, suppose that the urban data are also assumed to be independent of the rural data. Furthermore, assume that a priori $\mu_{rural}$ is independent of µurban. With these assumptions, $\mu_{rural}$ and $\mu_{urban}$ will also be independent of each other a posteriori.
-(a) What is the posterior distribution of $\mu_{urban}$ − $\mu_{rural}$?
-```{r}
+(a) What is the posterior distribution of $\mu_{urban} − \mu_{rural}$?
 
-```
+$$Y = \mu_{urban} - \mu_{rural}$$
+Since we assume urban and rural data to be independent,
+$$Y \sim N(m^*_{urban} - m^*_{rural}, v^*_{urban} + v^*_{rural}) $$
 
 (b) Plot the prior and the posterior distribution of $\mu_{urban}$ − $\mu_{rural}$ on the same graph.
-```{r}
+```{r,fig.align='center'}
+prior_mean <- m_u - m_r
+prior_var <- v_u + v_r
+prior_start <- prior_mean - 3*sqrt(prior_var)
+prior_end <- prior_mean + 3*sqrt(prior_var)
 
+post_mean <- m_star_u - m_star_r
+post_var <- v_star_u + v_star_r
+post_start <- post_mean - 3*sqrt(post_var)
+post_end <- post_mean + 3*sqrt(post_var)
+
+all_start <- min(prior_start, post_start)
+all_end <- max(prior_end, post_end)
+
+all_xs <- seq(all_start, all_end, length.out=1001)
+prior_dense <- dnorm(all_xs, 
+                    mean = prior_mean, 
+                    sd = sqrt(prior_var))
+post_dense <- dnorm(all_xs,
+                    mean = post_mean,
+                    sd = sqrt(post_var))
+plot(all_xs, post_dense,
+     type='l', col = 'black',
+     xlim = c(all_start, all_end),
+     main = expression(paste("Posterior of ", mu["urban"], "- ", mu["rural"])),
+     xlab = expression(paste(mu["urban"], " - ", mu["rural"])),
+     ylab = "Density"
+     )
+lines(all_xs, prior_dense, type = 'l', col = 'gray')
+legend("topleft", c("Prior","Posterior"), lty=1, col = c("gray", "black"))
 ```
 
 (c) State and interpret in the context of this problem the (central) 95% posterior credible interval for $\mu_{urban}$ − $\mu_{rural}$.
 ```{r}
-
+qnorm(c(0.025,0.975),mean=post_mean, sd = sqrt(post_var))
 ```
-
+There is a 95% probability that the difference between the population mean of the urban residents and rural residents if between 34 and 60. Since this interval does not include 0, we can conclude that urban residents have a significantly higher average serum cholesterol.
 
 ***
 ### Part 5 ###
@@ -118,26 +185,41 @@ hawks.2009 <- c(1,1,3,3,2,2,2,4,0,3)
 
 (a) What is the expected value of the posterior distribution for $\theta_{2003}$ if the prior is a gamma distribution with shape=0.2 and rate=0.2?
 ```{r}
-
+a_2003 <- 0.2
+b_2003 <- 0.2
+a_star_2003 <- a_2003 + sum(hawks.2003)
+b_star_2003 <- b_2003 + length(hawks.2003)
+a_star_2003 / b_star_2003
 ```
 
 (b) What is the expected value of the posterior distribution for $\theta_{2009}$ if the same prior is used as in the previous problem (i.e., Gamma(0.2,0.2)?
 ```{r}
-
+a_2009 <- 0.2
+b_2009 <- 0.2
+a_star_2009 <- a_2009 + sum(hawks.2009)
+b_star_2009 <- b_2009 + length(hawks.2009)
+a_star_2009 / b_star_2009
 ```
 
 (c) What is the expected value of the posterior distribution of $d = \theta_{2009} - \theta_{2003}$?
 ```{r}
-
+J <- 10000
+sim_2003 <- rgamma(J,shape = a_star_2003, rate = b_star_2003)
+sim_2009 <- rgamma(J,shape = a_star_2009, rate = b_star_2009)
+diffs <- sim_2009 - sim_2003
+mean(diffs)
 ```
 
 (d) What is the 95% posterior credible interval for $d$?
 ```{r}
-
+quantile(diffs, c(0.025, 0.975))
 ```
 
 (e) Plot the Monte-Carlo estimated posterior distribution of $d = \theta_{2009} - \theta_{2003}$ by using the density and plot functions in R.
-```{r}
-
+```{r,fig.align='center'}
+plot(density(diffs),
+     main = expression(paste("Posterior of ", theta["2009"], "- ", theta["2003"])),
+     xlab = expression(paste(theta["2009"], " - ", theta["2003"])),
+     ylab = "Density")
 ```
 
