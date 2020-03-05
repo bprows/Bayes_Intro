@@ -222,4 +222,4 @@ plot(density(diffs),
      xlab = expression(paste(theta["2009"], " - ", theta["2003"])),
      ylab = "Density")
 ```
-
+There is a 95% probability that the true difference between $\theta_{2009}$ and $\theta_{2003}$ is between 0.03 and 2.19. We can conclude that there is a difference in behavior of red tail hawks in that time.
