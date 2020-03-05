@@ -1,0 +1,21 @@
+---
+title: 'Homework 9: Normal - Inverse Gamma'
+author: "Broderick Prows"
+date: "3/5/2020"
+output: html_document
+---
+
+```{r}
+library(invgamma)
+a_update <- function(a, dat) {
+  return( a + (length(dat) / 2))
+}
+b_update <- function(b,mu,dat) {
+  return(b + sum((dat - mu)**2)/2)
+}
+```
+
+
+
+
+
