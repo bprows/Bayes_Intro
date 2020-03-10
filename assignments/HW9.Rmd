@@ -5,6 +5,15 @@ date: "3/5/2020"
 output: html_document
 ---
 
+
+## Part 1 ## 
+A study was done to see if taking a fish oil supplement lowered blood pressure. For the seven subjects the change in blood pressure was: 8, 12, 10, 14, 2, 0, 0. The study organizers felt it was reasonable to assume the data were conditionally iid and normally distributed with known mean $\mu$ = 6.3 and variance $\sigma^2$. For the prior distribution for $\sigma^2$, we have chosen an inverse-gamma with shape=2.01 and rate=49.
+
+(a) Derive the posterior distribution of $\sigma^2$. (That is, show that the posterior distribution of $\sigma^2$ is an inversegamma)
+```{r, echo=FALSE, fig.cap='Derivation of Normal - Inverse Gamma', out.width = '100%', fig.align='center'}
+knitr::include_graphics("./../pics/hw9-posterior-inverse-gamma.jpg") ## Need to change thiss
+```
+
 ```{r}
 library(invgamma)
 a_update <- function(a, Y) {
@@ -13,14 +22,6 @@ a_update <- function(a, Y) {
 b_update <- function(b,mu,Y) {
   return(b + sum((Y - mu)**2)/2)
 }
-```
-
-## Part 1 ## 
-A study was done to see if taking a fish oil supplement lowered blood pressure. For the seven subjects the change in blood pressure was: 8, 12, 10, 14, 2, 0, 0. The study organizers felt it was reasonable to assume the data were conditionally iid and normally distributed with known mean $\mu$ = 6.3 and variance $\sigma^2$. For the prior distribution for $\sigma^2$, we have chosen an inverse-gamma with shape=2.01 and rate=49.
-
-(a) Derive the posterior distribution of $\sigma^2$. (That is, show that the posterior distribution of $\sigma^2$ is an inversegamma)
-```{r, echo=FALSE, fig.cap='Derivation of Normal - Inverse Gamma', out.width = '100%', fig.align='center'}
-knitr::include_graphics("./../pics/hw7-gp-pred.jpg")
 ```
 
 (b) Refer to part a. Plot the prior and the posterior distributions for $\sigma^2$ on the same graph. Make sure to include a legend to distinguish the prior from the posterior.
@@ -70,10 +71,13 @@ pinvgamma(49,shape = a_star, rate = b_star)
 ```
 
 (c) Plot the posterior predictive distribution for the next downtown Cairo police officer’s blood lead concentration.
-```{r}
+```{r, fig.align='center'}
 J <- 10000
 sim_blood <- rnorm(J, mean = mu, sd = sqrt(rinvgamma(J,shape = a_star, rate = b_star)))
-plot(density(sim_blood))
+plot(density(sim_blood), 
+     main = "Posterior Predictive Distribution",
+     xlab = "Blood Lead Concentration",
+     ylab = "Density")
 ```
 
 ## Part 3 ##
@@ -111,8 +115,8 @@ b_star_urban / (a_star_urban + 1)
 thetas <- seq(0,500,length.out = 1001)
 plot(thetas, dinvgamma(thetas,shape = a_star_urban, rate = b_star_urban), 
      type = 'l',
-     main = "Prior and Posterior of Urban Residents",
-     xlab = expression(sigma**2),
+     main = expression(paste("Prior & Posterior of ", sigma['urban']**2)),
+     xlab = expression(sigma['urban']**2),
      ylab = 'Density')
 lines(thetas,dinvgamma(thetas,shape = a, rate = b), col = 'gray')
 legend('topright', c("Prior","Posterior"), col = c("gray","black"), lty = 1)
@@ -141,7 +145,7 @@ thetas <- seq(0,500,length.out = 1001)
 plot(thetas, dinvgamma(thetas,shape = a_star_rural, rate = b_star_rural), 
      type = 'l',
      main = expression(paste("Posterior of ", sigma['rural']**2)),
-     xlab = expression(sigma**2),
+     xlab = expression(sigma['rural']**2),
      ylab = 'Density')
 ```
 
@@ -165,6 +169,8 @@ plot(density(ratios),
 ```{r}
 quantile(ratios, c(0.025, 0.975))
 ```
+There is a 95% probability that the true ratio of $\sigma^2_{urban} / \sigma^2_{rural}$ is between 0.316 and 2.607. Since this interval does not exclude 0, we cannot reject the null hypothesis that the variances are equal. 
+
 
 (c) Explain why it is important to determine whether the CI for the ratio of variances includes 1. (Hint: What does it imply if the ratio equals 1?)
 
@@ -173,10 +179,13 @@ When the ratio is around one we can conclude that the variances are equal, which
 
 ## Part 6 ##
 Plot the prior predictive distribution of $Y_{urban}$ and the posterior predictive distribution of $Y_{urban}$ on the same graph. (This of course requires a legend be included in your plot to distinguish one from the other.)
-```{r}
-
+```{r, fig.align='center'}
+J <- 10000
+sim_prior <- rnorm(J, mean = mu, sd = sqrt(rinvgamma(J, shape = a, rate = b)))
+sim_post <- rnorm(J, mean = mu, sd = sqrt(rinvgamma(J, shape = a_star_urban, b_star_urban)))
+plot(density(sim_post), col = 'black',
+     main = expression(paste("Predictive Distributions of ", Y['urban'])),
+     ylab = 'Density', xlab = expression(Y['urban']))
+lines(density(sim_prior), col = 'red')
+legend('topright', c("Prior","Posterior"), col = c("red", "black"), lty = 1)
 ```
-
-
-
-
