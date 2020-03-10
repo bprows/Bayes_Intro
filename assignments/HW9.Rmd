@@ -71,7 +71,9 @@ pinvgamma(49,shape = a_star, rate = b_star)
 
 (c) Plot the posterior predictive distribution for the next downtown Cairo police officer’s blood lead concentration.
 ```{r}
-
+J <- 10000
+sim_blood <- rnorm(J, mean = mu, sd = sqrt(rinvgamma(J,shape = a_star, rate = b_star)))
+plot(density(sim_blood))
 ```
 
 ## Part 3 ##
@@ -91,17 +93,17 @@ Posterior: $\pi( \sigma^2 | Y) \sim$ IG(`r a_star`,`r b_star`)
 
 (b) What is the prior expected value of $\sigma^2_{urban}$?
 ```{r}
-b/(a+1)
+b/(a-1)
 ```
 
 (c) What is the posterior expected value of $\sigma^2_{urban}$?
 ```{r}
-b_star_urban / (a_star_urban + 1)
+b_star_urban / (a_star_urban - 1)
 ```
 
 (d) What is the posterior mode of $\sigma^2_{urban}$?
 ```{r}
-
+b_star_urban / (a_star_urban + 1)
 ```
 
 (e) Plot the posterior and prior distribution of $\sigma^2_{urban}$ on the same graph. Make sure to include a legend to distinguish the prior from the posterior.
