@@ -85,12 +85,12 @@ Here is the total serum cholesterol for 9 urban residents of Guatemala: 197, 199
 
 (a) What is the posterior distribution of the variance in this case?
 ```{r}
-mu <- 220
+mu_urban <- 220
 urban <- c(197, 199, 214, 217, 222, 223, 227, 228, 234)
 a <- 2.5
 b <- 600
 a_star_urban <- a_update(a,urban)
-b_star_urban <- b_update(b,mu,urban)
+b_star_urban <- b_update(b,mu_urban,urban)
 ```
 Posterior: $\pi( \sigma^2 | Y) \sim$ IG(`r a_star`,`r b_star`)
 
@@ -128,12 +128,12 @@ Here is the total serum cholesterol for 10 rural residents of Guatemala: 139, 14
 
 (a) What is the posterior distribution of the variance in this case?
 ```{r}
-mu <- 150
+mu_rural <- 150
 rural <- c(139, 142, 143, 144, 145, 148, 155, 162, 171, 181)
 a <- 2.5
 b <- 600
 a_star_rural <- a_update(a,rural)
-b_star_rural <- b_update(b,mu,rural)
+b_star_rural <- b_update(b,mu_rural,rural)
 ```
 
 Posterior: $\pi( \sigma^2 | Y) \sim$ IG(`r a_star_rural`,`r b_star_rural`)
@@ -167,9 +167,10 @@ plot(density(ratios),
 
 (b) Report and interpret a 95% posterior credible interval for this ratio.
 ```{r}
-quantile(ratios, c(0.025, 0.975))
+quantiles_ratio <- quantile(ratios, c(0.025, 0.975))
+quantiles_ratio
 ```
-There is a 95% probability that the true ratio of $\sigma^2_{urban} / \sigma^2_{rural}$ is between 0.316 and 2.607. Since this interval does not exclude 0, we cannot reject the null hypothesis that the variances are equal. 
+There is a 95% probability that the true ratio of $\sigma^2_{urban} / \sigma^2_{rural}$ is between `r quantiles_ratio[1]` and `r quantiles_ratio[2]`. Since this interval does not exclude 1, we fail to reject the null hypothesis that the variances are equal. 
 
 
 (c) Explain why it is important to determine whether the CI for the ratio of variances includes 1. (Hint: What does it imply if the ratio equals 1?)
@@ -181,8 +182,8 @@ When the ratio is around one we can conclude that the variances are equal, which
 Plot the prior predictive distribution of $Y_{urban}$ and the posterior predictive distribution of $Y_{urban}$ on the same graph. (This of course requires a legend be included in your plot to distinguish one from the other.)
 ```{r, fig.align='center'}
 J <- 10000
-sim_prior <- rnorm(J, mean = mu, sd = sqrt(rinvgamma(J, shape = a, rate = b)))
-sim_post <- rnorm(J, mean = mu, sd = sqrt(rinvgamma(J, shape = a_star_urban, b_star_urban)))
+sim_prior <- rnorm(J, mean = mu_urban, sd = sqrt(rinvgamma(J, shape = a, rate = b)))
+sim_post <- rnorm(J, mean = mu_urban, sd = sqrt(rinvgamma(J, shape = a_star_urban, b_star_urban)))
 plot(density(sim_post), col = 'black',
      main = expression(paste("Predictive Distributions of ", Y['urban'])),
      ylab = 'Density', xlab = expression(Y['urban']))
