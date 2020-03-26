@@ -80,5 +80,7 @@ gibbs_nnig <- function(m,v,a,b,data,J=10000) {
   return(output)
   
 }
+18008648331
+
 
 

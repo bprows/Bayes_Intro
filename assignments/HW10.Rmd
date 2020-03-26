@@ -79,6 +79,14 @@ bp_out_mu <- bp_out$mu[-c(1:200)]
 bp_out_sig2 <- bp_out$sig2[-c(1:200)]
 ```
 
+```{r,fig.align='center'}
+acf(bp_out_mu)
+```
+
+```{r,fig.align='center'}
+acf(bp_out_sig2)
+```
+
 
 (a) What is the posterior probability that $\mu > 0$?
 ```{r}
@@ -173,13 +181,22 @@ abline(v=200,col='red')
 ```
 
 
-```{r}
+```{r,fig.align='center'}
 urban_out_mu <- urban_out$mu[-c(1:200)]
 urban_out_sig2 <- urban_out$sig2[-c(1:200)]
 ```
 
+```{r,fig.align='center'}
+acf(urban_out_mu)
+```
+This does not seem to be mixing all that well but it looks the same even if I throw out the first 5000 values.
 
-```{r,fig.alig='center'}
+```{r,fig.align='center'}
+acf(urban_out_sig2)
+```
+
+
+```{r,fig.align='center'}
 prior_post_plot_mu(m=urban_m, v=urban_v, post_mu=urban_out_mu)
 ```
 
@@ -218,9 +235,18 @@ abline(v=200,col='red')
 ```
 
 
-```{r}
+```{r,fig.align='center'}
 urban_out2_mu <- urban_out2$mu[-c(1:200)]
 urban_out2_sig2 <- urban_out2$sig2[-c(1:200)]
+```
+
+
+```{r,fig.align='center'}
+acf(urban_out2_mu)
+```
+
+```{r,fig.align='center'}
+acf(urban_out2_sig2)
 ```
 
 
@@ -281,7 +307,16 @@ rural_out_sig2 <- rural_out$sig2[-c(1:200)]
 ```
 
 
-```{r}
+```{r,fig.align='center'}
+acf(rural_out_mu)
+```
+
+```{r,fig.align='center'}
+acf(rural_out_sig2)
+```
+
+
+```{r,fig.align='center'}
 plot(density(rural_out_mu), 
      main = expression(paste("Posterior for ", mu["rural"])),
      xlab=expression(mu["rural"]),
@@ -293,7 +328,7 @@ plot(density(rural_out_mu),
 Now we consider comparing $\mu_{urban}$ to $\mu_{rural}$ and $\sigma_{urban}^2$ to $\sigma_{rural}^2$. Note the the former is akin to the independent two-sample t-test to comparing means from two populations which is regularly taught in stat 121. The former is not taught in stat 121 because the sampling distribution is beyond the scope of that course. In Bayes, inference for comparing $\sigma_{urban}^2$ to $\sigma_{rural}^2$ follows exactly as before!
 
 (a) Plot the posterior distribution of the difference in the means of the two groups: $\mu_{urban} - \mu_{rural}$. What is the 95% (posterior) credible interval for this difference? What can you conclude?
-```{r}
+```{r,fig.align='center'}
 diffs_mu <- urban_out_mu - rural_out_mu
 interval_mu <- quantile(diffs_mu, c(0.025, 0.975))
 plot(density(diffs_mu), 
@@ -305,7 +340,7 @@ interval_mu
 ```
 
 (b) Plot the posterior distribution of the ratio of variances (i.e., of $\sigma_{urban}^2 / \sigma_{rural}^2$). What is the 95% posterior credible interval for this ratio? What can you conclude?
-```{r}
+```{r,fig.align='center'}
 ratio_sig2 <- urban_out_sig2 / rural_out_sig2
 interval_sig2 <- quantile(ratio_sig2, c(0.025, 0.975))
 plot(density(ratio_sig2), 
@@ -322,7 +357,20 @@ Plot the posterior predictive distribution of $Y_{urban}$ and the posterior pred
 same graph. (This of course requires a legend be included in your plot to distinguish one from the other.).
 Obtain an interval for difference in prediction of the urban group relative to the rural. How does this interval
 compare to that one found in part 4a?
-```{r}
+```{r,fig.align='center'}
+y_urban_pred <- rnorm(length(urban_out_mu), urban_out_mu, sqrt(urban_out_sig2))
+y_rural_pred <- rnorm(length(rural_out_mu), rural_out_mu, sqrt(rural_out_sig2))
+plot(density(y_urban_pred), 
+     main = expression(paste("Posterior-Predictive of ", Y[urban], " and ", Y[rural])), 
+     xlab = "Total Serum Cholesterol", ylab = "Density", col = "black",
+     xlim = c(100,300), ylim = c(0,0.035))
+lines(density(y_rural_pred), col = 'red')
+legend("topright", c(expression(Y[urban]), expression(Y[rural])), col = c('black', 'red'), lty=1)
+```
 
+This interval is wider than the one in part 4a because it is measuring predicted y's rather than a posterior of $\mu$. This distribution takes into account the posterior variance for each distribution instead of just the variance associated to $\mu$.
+```{r}
+diffs_y <- y_urban_pred - y_rural_pred
+quantile(diffs_y, c(0.025, 0.975))
 ```
 
