@@ -79,8 +79,9 @@ gibbs_nnig <- function(m,v,a,b,data,J=10000) {
   output <- list(mu,sig2)
   return(output)
   
-}
-18008648331
+}                
+
+
 
 
 
