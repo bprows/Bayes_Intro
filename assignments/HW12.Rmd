@@ -1,0 +1,140 @@
+---
+title: "HW12"
+author: "Broderick Prows"
+date: "4/9/2020"
+output: html_document
+---
+
+In this homework we will demostrate the the M-H algorithm works and employ it in modeling scenario where it isrequired. Remember to submit your R code along with the completed homework.
+
+(1) In this part of the homework we will demonstrate that the Metropolis algorithm works. To do this, we willuse the Metropolis algorithm in a situation where it is unnecessary to do so. Recall problem 2 of homework 8where you considered the total serum cholesterol for eight urban residents of Guatemala:
+```{r}
+cholest_u <- c(197, 199, 214, 217, 222, 227, 228, 234)
+sigma2 <- 260
+m <- 180
+v <- 100
+```
+
+For this problem we assumed that the population variance of serum cholesterol measurements for urbanresidents of Guatemala was known to be σ2 = 260. We also assumed that the population mean, µurban, should follow a Normal distribution with a mean of m = 180 and a variance of v = 100. Recall that in this setting the posterior distribution is know to be a Normal distribution with mean and variance
+$$\mu^{\star} = \frac{nv\bar{y} + \sigma^2m}{nv+\sigma^2}$$ $${\sigma^2}^{\star} = \frac{v\sigma^2}{nv+\sigma^2}$$
+Because of this, we do not need to use a Metropolis algorithm to sample from the posterior distribution. But, we will to demonstrate that the algorithm indeed works.
+
+(a) Draw 100,000 samples from the posterior distribution for µ using the Metropolis algorithm (set set.seed(1)).
+```{r}
+set.seed(1)
+J <- 100000
+
+log_g <- function(x) { -1/(2*sigma2) * sum((cholest_u - x)**2) - ((1/(2*v)*(x-m)**2))}
+
+x <- numeric()
+x[1] <- mean(cholest_u)
+
+tau <- 10 # proposal sd
+
+for (j in 2:J) {
+  xp <- rnorm(1, mean = x[j-1], sd = tau)
+  
+  lgc <- log_g(x[j-1])
+  lgp <- log_g(xp)
+  
+  # Acceptance probability
+  alpha <- min(1, exp(lgp - lgc))
+  
+  U <- runif(1,0,1)
+  
+  x[j] <- ifelse(U < alpha, xp, x[j-1])
+}
+
+# acceptance ratio
+mean(diff(x) != 0)
+```
+
+
+Show that the algorithm has converged using a trace plot. Show that the algorithm mixes well using a auto-correlation plot.
+```{r,fig.align='center'}
+keep <- seq(1000, J, by=10)
+plot(x[keep],type='l')
+acf(x[keep])
+```
+
+
+(b) Plot the approximate posterior distribution using a histogram and the 100,000 draws. In the same plot, add the theoretical posterior distribution using the dnorm function.
+```{r}
+hist(x[keep],freq=F)
+xs <- seq(190,230,length=1000)
+lines(xs,dnorm(xs,mean=mean(x[keep]),sd=sd(x[keep])),col='red')
+```
+
+
+(2) Now relax the assumption that σ2 is known and assume that σ2 ∼ UN(0, 500) where UN denotes a uniform distribution. For µ use the prior distribution from the previous problem. As in HW 10, the joint posterior distribution for (µ, σ2) is not available in closed form. Therefore, we will sample from it. To do this, we will merge the Gibbs sampler and Metropolis algorithm. The Gibbs sampler will be used to sample µ using the full conditional distribution of µ and the Metropolis algorithm will be used to sample σ2 since the full conditional of σ2 is not of recognizable form. Doing what was just described, collect 10,000 draws from the joint posterior distribution from (µ, σ2). Find the posterior expected value for both µ and σ2 and compare them to values you obtained in problem 2b and 2c of homework 10.
+```{r}
+J <- 10000
+
+a <- 0
+b <- 500
+m <- 180
+v <- 100
+n <- length(cholest_u)
+y_bar <- mean(cholest_u)
+
+tau <- 150
+
+mu <- numeric()
+mu[1] <- y_bar
+
+sig2 <- numeric()
+sig2[1] <- var(cholest_u)
+
+g_sig2 <- function(sig2,mu_y,y) {
+  sum_yi_mu_2 <- sum((y - mu_y)**2)
+  sig2**(-n/2) * exp(sum_yi_mu_2 / -(2*sig2))
+}
+
+log_g_sig2 <- function(sig2,mu_y,y) {
+  sum_yi_mu_2 <- sum((y - mu_y)**2)
+  return((-n/2) * log(sig2) - 1/(2*sig2)*sum_yi_mu_2)
+}
+
+for (j in 2:J) {
+
+  # Gibbs sample for mu_y
+  m_star <- (n*v*y_bar + sig2[j-1]*m) / (n*v + sig2[j-1])
+  v_star <- (v*sig2[j-1]) / (n*v + sig2[j-1])
+  mu[j] <- rnorm(1,mean = m_star, sd = sqrt(v_star))
+  
+  # Metropolis for sigma2
+  sig2[j] <- sig2[j-1]
+  sig2_p <- rnorm(1, mean = sig2[j-1], sd = tau)
+  if (0 < sig2_p & sig2_p < b) {
+    log_gp <- log_g_sig2(sig2_p, mu[j], cholest_u)
+    log_gc <- log_g_sig2(sig2[j-1], mu[j], cholest_u)
+  
+    alpha <- min(1, exp(log_gp - log_gc))
+  
+    U <- runif(1,0,1)
+    if (alpha > U) {
+      sig2[j] <- sig2_p
+    }
+  }
+}
+
+# acceptance ratio
+mean(diff(sig2) != 0)
+```
+
+```{r,fig.align='center'}
+keep <- seq(1000,J,by=10)
+mu_keep <- mu[keep]
+par(mfrow=c(1,2))
+acf(mu_keep)
+plot(mu_keep,type='l')
+
+sig2_keep <- sig2[keep]
+par(mfrow=c(1,2))
+acf(sig2_keep)
+plot(sig2_keep,type='l')
+
+print(paste("Posterior mean of Mu:", round(mean(mu_keep),2)))
+print(paste("Posterior mean of Sig2:", round(mean(sig2_keep),2)))
+```
+From HW 10: Posterior mean of mu = 209.22 and sig2 = 289.09.
