@@ -1,0 +1,303 @@
+---
+title: "Final Take Home"
+author: "Broderick Prows"
+date: "4/16/2020"
+output: html_document
+---
+
+Set up Functions for Gibbs Sampling
+```{r}
+set.seed(101)
+library(invgamma)
+library(MASS)
+
+update_mu <- function(sigma2, m, v, n, y_bar) {
+  # update m
+  m_star <- ((n*v*y_bar) + (sigma2*m)) / (n*v + sigma2)
+  # update v
+  v_star <- (v*sigma2) / (n*v + sigma2)
+  
+  next_mu <- rnorm(1, mean = m_star, sd = sqrt(v_star))
+  
+  return(next_mu)
+}
+
+update_sig2 <- function(a, b, n, Y, mu) {
+  # update a
+  a_star <- a + (n/2)
+  #update b
+  b_star <- b + (sum((Y-mu)**2)/2)
+  
+  next_sig2 <- rinvgamma(1,shape = a_star, rate = b_star)
+  
+  return(next_sig2)
+}
+
+gibbs_normal_invGamma <- function(m,v, a,b, Y, J = 10000) {
+  # Define n, y_bar for data given
+  n <- length(Y)
+  y_bar <- mean(Y)
+  
+  mu <- numeric()
+  mu[1] <- mean(Y)
+  sig2 <- numeric()
+  sig2[1] <- var(Y)
+  
+  for (j in 2:J) {
+    mu[j] <- update_mu(sigma2 = sig2[j-1], m = m, v = v, n = n, y_bar = y_bar)
+    sig2[j] <- update_sig2(a = a, b = b, n = n, Y = Y, mu = mu[j])
+  }
+  out <- NULL
+  out$mu <- mu
+  out$sig2 <- sig2
+  return(out)
+}
+
+trace_acf <- function(samp_vals, to_keep) {
+  par(mfrow=c(1,2))
+  plot(samp_vals[to_keep],type = 'l')
+  acf(samp_vals[to_keep])
+}
+```
+
+### Part 1
+An experiment was designed to determine whether a mineral supplement was effective in increasing annual yield in milk. Fifteen pairs of identical twin dairy cows were used as the experimental units. One cow from each pair was randomly assigned to the treatment group that received the supplement. The other cow from the pair was assigned to the control group that did not receive the supplement. The annual yields are given below:
+```{r}
+control <- c(35.25,43.21, 47.63, 48.99, 32.34, 34.69, 34.39,
+             36.58, 33.85, 32.26, 36.71, 35.01, 38.42, 39.98, 40.04)
+tmt <- c(33.40, 42.79, 49.10, 48.66, 31.25, 36.80, 39.65, 38.49,
+         32.97, 31.24, 32.18, 32.46, 42.45, 41.86, 37.11)
+
+```
+
+Assume that the annual yields from cows receiving the treatment $y_{it}$ are $y_{it} | \mu_{t}, \sigma_t^2 \sim \mathcal{N}(\mu_t,\sigma_t^2)$, and
+that the annual yields from the cows in the control group $y_{ic}$ are $y_{ic} | \mu_{c}, \sigma_c^2 \sim \mathcal{N}(\mu_c,\sigma_c^2)$. Researchers
+want to test the hypothesis that $H_0: \mu_c - \mu_t \geq 0$ vs $H_1: \mu_c - \mu_t < 0$.
+
+(a) Using $\mu_t \sim \mathcal{N} (40,10^2)$ (note that 10 is the standard deviation), $\mu_c \sim \mathcal{N} (35,10^2)$ (note that 10 is the standard deviation), $\sigma_t^2 \sim \mathcal{IG}(1,1)$ $\sigma_c^2 \sim \mathcal{IG}(1,1)$ collect 10,000 samples from the joint posterior distribution for the treatment and control groups and provide evidence that the algorithm converged.
+```{r,fig.align='center'}
+# Priors for Treatment Group
+mt <- 40
+vt <- 100
+at <- 1
+bt <- 1
+
+# Priors for Control Group
+mc <- 35
+vc <- 100
+ac <- 1
+bc <- 1
+
+J <- 10000
+out_t <- gibbs_normal_invGamma(m = mt, v = vt, a = at, b = bt, Y = tmt, J = J)
+out_c <- gibbs_normal_invGamma(m = mc, v = vc, a = ac, b = bc, Y = control, J = J)
+
+keep <- seq(500,J,by=1)
+trace_acf(out_t$mu, to_keep = keep)
+trace_acf(out_t$sig2, to_keep = keep)
+trace_acf(out_c$mu, to_keep = keep)
+trace_acf(out_c$sig2, to_keep = keep)
+
+out_t$mu <- out_t$mu[keep]
+out_t$sig2 <- out_t$sig2[keep]
+out_c$mu <- out_c$mu[keep]
+out_c$sig2 <- out_c$sig2[keep]
+```
+
+(b) Plot the posterior and prior distribution for each parameter on the same graph (you should have four figures). Make sure to include a legend to distinguish the prior from the posterior.
+```{r,fig.align='center'}
+par(mfrow=c(1,2))
+x <- seq(15,60,length.out=1001)
+plot(x,dnorm(x, mean = mt, sd = sqrt(vt)), lwd=2, type='l', col='gray', ylim = c(0,0.29),
+     main = expression(mu[t]),
+     xlab = expression(mu[t]), ylab = 'Density')
+lines(density(out_t$mu), col = 'black', lwd = 2)
+legend('topleft',c('Prior', 'Posterior'), lwd=c(2,2), lty=c(1,1), col=c('gray','black'),cex=0.75)
+
+x <- seq(0,60,length.out=1001)
+plot(x,dinvgamma(x,shape=at,rate=bt),col='gray',type='l', lwd=2,
+     main = expression(sigma[t]^2),
+     xlab = expression(sigma[t]^2), ylab = 'Density')
+lines(density(out_t$sig2),lwd=2)
+legend('topright',c('Prior', 'Posterior'), lwd=c(2,2), lty=c(1,1), col=c('gray','black'),cex=0.75)
+```
+
+```{r,fig.align='center'}
+par(mfrow=c(1,2))
+x <- seq(15,60,length.out=1001)
+plot(x,dnorm(x, mean = mc, sd = sqrt(vc)), lwd=2, type='l', col='gray', ylim = c(0,0.31),
+     main = expression(mu[c]),
+     xlab = expression(mu[c]), ylab = 'Density')
+lines(density(out_c$mu), col = 'black', lwd = 2)
+legend('topleft',c('Prior', 'Posterior'), lty=c(1,1), lwd=c(2,2), col=c('gray','black'),cex=0.75)
+
+x <- seq(0,60,length.out=1001)
+plot(x,dinvgamma(x,shape=ac,rate=bc),col='gray',type='l', lwd=2,
+     main = expression(sigma[c]^2),
+     xlab = expression(sigma[c]^2), ylab = 'Density')
+lines(density(out_c$sig2),lwd=2)
+legend('topright',c('Prior', 'Posterior'), lwd=c(2,2), lty=c(1,1), col=c('gray','black'),cex=0.75)
+```
+
+(c) Using the draws from the posterior distribution, test the hypothesis provided above. Clearly indicate what conclusions you make in the context of the problem
+```{r,fig.align='center'}
+diffs <- out_c$mu - out_t$mu
+mean(diffs)
+quantile(diffs,c(0.025,0.975))
+par(mfrow=c(1,2))
+plot(density(out_c$mu),col='gray',lwd=2,
+     main = expression(mu),
+     xlab = expression(mu),ylab='Density')
+lines(density(out_t$mu),col='black',lwd=2)
+legend('topright', c('Control','Treatment'), lty=c(1,1), lwd=c(2,2), col=c('gray','black'),cex=0.75)
+
+plot(density(diffs),
+     main=expression(paste(mu[c],' - ', mu[t])),
+     xlab=expression(paste(mu[c],' - ', mu[t])),ylab='Density')
+```
+Here, we fail to reject the null hypothesis. There is a 95% probability that the true difference of means is between `r round(quantile(diffs,0.025),2)` and `r round(quantile(diffs,0.975),2)`. This interval includes 0, so there does not appear to be a statistically significant difference between the two groups. 
+
+(d) A separate researcher decided that since the two cows in the same pair share identical genetic background, their responses will be more similar than two cows that were from different pairs. There is a natural pairing. As the samples drawn from the two populations cannot be considered independent of each other, they decided to take differences $d_i = y_{ic} - y_{it})$. The differences will be assumed conditionally iid $\mathcal{N}(\mu_d,\sigma_d^2)$ where $\mu_d = \mu_c - \mu_t$ and we will assume that $\sigma_d^2 = 7$ is known. The researcher believes that the mean of the differences in yeild between the treatment and control groups is fairly close to zero and is quite certain (say 95%) that the difference is not more than ±15. 
+
+i. Formulate a prior distribution for $\mu_d$ according to the information provided by the researcher.
+```{r,fig.align='center'}
+cow_pairs <- control - tmt
+cow_sig2 <- 7
+# Priors
+mp <- mc - mt
+vp <- vc + vt
+```
+
+ii. Is the assumption of normality for differences in yield sensible?
+
+I think this assumption is sensible, since the sum (or difference) of 2 normal distributions is a normal distribution. 
+
+iii. Identify the posterior distribution of $\mu_d$ (i.e., $\pi(\mu_d|\sigma_d^2, d_1, . . . ,d_n))$ and use it to test the hypothesis that $H_0:\mu_d \ge 0$ vs $H_a:\mu_d < 0$
+```{r}
+n <- length(cow_pairs)
+y_bar <- mean(cow_pairs)
+
+# update m
+mp_star <- ((n*vp*y_bar) + (cow_sig2*mp)) / (n*vp + cow_sig2)
+# update v
+vp_star <- (vp*cow_sig2) / (n*vp + cow_sig2)
+```
+
+
+$\pi(\mu_d|\sigma_d^2, d_1, . . . ,d_n)) \sim \mathcal{N}(m^*=$ `r round(mp_star,2)` $,v^*=$ `r round(vp_star,2)` $)$.
+
+```{r,fig.align='center'}
+interval <- qnorm(c(0.025,0.975),mean=mp_star,sd=sqrt(vp_star))
+x <- seq(-5,5,length.out=1001)
+plot(x,dnorm(x,mean=mp_star,sd=sqrt(vp_star)), type='l',lwd=2,
+     main=expression(mu[d]),
+     xlab=expression(mu[d]),ylab='Density')
+abline(v=interval,col='gray')
+```
+Here, we again fail to reject the null hypothesis. There is a 95% probability that the true difference of means is between `r round(interval[1])` and `r round(interval[2])`. This interval includes 0, so there does not appear to be a statistically significant difference between the two groups when twins are paired. 
+
+(e) Which of the two analysis is more appropriate in this scenario? Why? In your answer to this problem focus on how the analysis was carried out, not the fact that in one scenario the population variance is assumed known and in the other it is not.
+
+To me, the second approach makes more sense because the researcher would have a better idea than I do about the relationship between cows. If they think that the twins should be paired than he is probably right, especially since they went to all the trouble of finding identical twins to experiment on. That being said, assuming the difference is not more than ±15 is not much of an assumption at all, so maybe he does not know what he is talking about... 
+
+### Part 2
+In class we studied the association between BMI of Pima indian women and diastolic blood pressure (dbp). We found that there was a positive assocition between these two variables and we quantified this association using a Bayesian simple linear model. In this part of the exam you will be tasked with answering the question “Is the regression slope between BMI and bloop pressure different for diabetic pima women relative to nondiabetic?” You will answer this question by fitting two simple linear regression models. Let $y_{di}$ and $x_{di}$ be the blood pressure and BMI measurements for the ith subject that is diabetic and $y_{hi}$ and $x_{hi}$ be the blood pressure and BMI measurements for the ith pacient that is healthy. Now the two models you will fit are:
+
+$$y_{di} = \beta_{0d} + \beta_{1d}x_{di} + \epsilon_i \;\; where \;\; \epsilon \sim \mathcal{N}(0,\sigma_d^2) \;\; and \;\; i = 1,...,D.$$
+$$y_{hi} = \beta_{0h} + \beta_{1h}x_{hi} + \epsilon_i \;\; where \;\; \epsilon \sim \mathcal{N}(0,\sigma_h^2) \;\; and \;\; i = 1,...,H.$$
+Here D and H are the number of diabetic and healty subjects, and $(\beta_{0d},\beta_{1d})$ are the slope and intercept for the diabetic group while $(\beta_{0h},\beta_{1h})$ are the slope and intercept for the healthy group. Assume that the prior distribution for intercepts from both groups is $\mathcal{N}(m_0,v_0)$ and that the prior distribution for the slope from both groups is $\mathcal{N}(m_1,v_1)$ and that the prior for both variances in the error term is $\mathcal{IG}(a,b)$. Use the following prior values $m_0 = m_1 = 0, v_0 = v_1 = 100^2$, and $a = b = 1$.
+
+To answer the question well, you will need to convince me that the MCMC algorithms for both models have converged and mix well. Then you will need to report a summary of the posterior distribution of $\beta_{1h} − \beta_{1d}$ that provides concrete evidence in support of the answer you supply.
+```{r,fig.align='center'}
+Xh <- Pima.tr$bmi[Pima.tr$type == "No"]
+Yh <- Pima.tr$bp[Pima.tr$type == "No"]
+Xd <- Pima.tr$bmi[Pima.tr$type != "No"]
+Yd <- Pima.tr$bp[Pima.tr$type != "No"]
+
+m1 <- m0 <- 1
+v1 <- v0 <- 100^2
+a <- b <- 1
+
+plot(Xh,Yh,pch=20,col='black',main="Scatterplot", xlab="BMI", ylab="BP")
+points(Xd,Yd,pch=20, col='red')
+legend('topleft',c("Healthy","Diabetic"),col=c('black','red'),pch=20)
+```
+
+```{r}
+fit_lr <- function(X,Y, m0,m1, v0,v1, a,b, J = 10000) {
+  beta0 <- numeric()
+  beta1 <- numeric()
+  sigma2 <- numeric()
+
+  # starting values
+  beta0[1] <- 0
+  beta1[1] <- 0
+  sigma2[1] <- 1
+  
+  n <- length(Y)
+  y_bar <- mean(Y)
+  y_var <- var(Y)
+  
+  for (j in 2:J) {
+  
+    # update sigma2
+    a_star <- n/2 + a
+    b_star <- .5*sum((Y - (beta0[j-1] + beta1[j-1]*X))**2) + b
+    sigma2[j] <- rinvgamma(1,shape=a_star,rate=b_star)
+    
+    # update beta0
+    v_star <- 1 / (n/sigma2[j] + 1/v0)
+    m_star <- v_star * ((1/sigma2[j] * sum(Y - beta1[j-1]*X) + m0/v0))
+    beta0[j] <- rnorm(1,mean=m_star,sd=sqrt(v_star))
+    
+    # Update beta1
+    v_star <- 1/(sum(X**2)/sigma2[j] + 1/v1)
+    m_star <- v_star *((1/sigma2[j])*sum(X*(Y - beta0[j])) + m1/v1)
+    beta1[j] <- rnorm(1, mean = m_star, sd = sqrt(v_star))
+  }
+  out <- NULL
+  out$beta0 <- beta0
+  out$beta1 <- beta1
+  out$sigma2 <- sigma2
+  return(out)
+}
+```
+
+```{r,fig.align='center'}
+J <- 500000
+out_h <- fit_lr(Xh,Yh, m0,m1, v0,v1, a,b, J) 
+keep <- seq(from=1000, to=J,by=70)
+
+trace_acf(out_h$beta0, keep)
+trace_acf(out_h$beta1, keep)
+trace_acf(out_h$sigma2, keep)
+```
+
+```{r,fig.align='center'}
+J <- 500000
+out_d <- fit_lr(Xd,Yd, m0,m1, v0,v1, a,b, J) 
+keep <- seq(from=1000, to=J,by=70)
+trace_acf(out_d$beta0, keep)
+trace_acf(out_d$beta1, keep)
+trace_acf(out_d$sigma2, keep)
+```
+
+The MCMC algorithms seem to have converged for both models. Now comparing $\beta_{1h} - \beta_{1d}$.
+```{r,fig.align='center'}
+par(mfrow=c(1,2))
+plot(density(out_d$beta1[keep]),col='black',lwd=2,ylim=c(0,2.75),
+     main = expression(beta[1]),
+     xlab = expression(beta[1]),ylab='Density')
+lines(density(out_h$beta1[keep]),col='gray',lwd=2)
+legend('topleft', c('Healthy','Diabetic'), lty=c(1,1), lwd=c(2,2),
+       col=c('gray','black'),cex=0.75)
+diff_B1 <- out_h$beta1[keep] - out_d$beta1[keep]
+interval_B1 <- quantile(diff_B1, c(0.025,0.975))
+plot(density(diff_B1), main = expression(paste(beta['1h'], ' - ', beta['1d'])),
+     xlab = expression(paste(beta['1h'], ' - ', beta['1d'])), ylab='Density')
+abline(v=interval_B1,col='gray')
+```
+
+There is a 95% probability that the true difference of means is between `r round(interval_B1[1],2)` and `r round(interval_B1[2],2)`. This interval includes 0, so there does not appear to be a statistically significant difference between the the slope for healthy and diabetic individuals. 
+
+
